@@ -19,7 +19,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { handleContactSubmit, type ContactFormState, handleSummarize, type SummarizerState } from "@/app/actions";
-import { useFormState, useFormStatus } from "react-dom";
+import { useFormStatus } from "react-dom";
+import { useActionState } from "react";
+
 
 import { Document, Packer, Paragraph, TextRun, HeadingLevel } from "docx";
 import { saveAs } from "file-saver";
@@ -136,7 +138,7 @@ const ServiceCard = ({ icon, title, description }: { icon: React.ReactNode, titl
 
 function Summarizer() {
   const initialState: SummarizerState = { summary: '', progress: '' };
-  const [state, formAction] = useFormState(handleSummarize, initialState);
+  const [state, formAction] = useActionState(handleSummarize, initialState);
   const { pending } = useFormStatus();
 
   return (
@@ -295,5 +297,7 @@ export function HomePage() {
     </div>
   );
 }
+
+    
 
     

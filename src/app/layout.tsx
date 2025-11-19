@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster"
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'FOCI Connect',
+  title: 'FOCI Leave Application',
   description: 'FOCI Group | Engineering | ICT | Smart Automation',
 };
 

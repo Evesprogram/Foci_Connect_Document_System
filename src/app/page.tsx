@@ -1,8 +1,5 @@
 import { PageHeader } from '@/components/page-header';
-import { DocumentInfo } from '@/components/document-info';
-import { ServiceShowcase } from '@/components/service-showcase';
-import { Summarizer } from '@/components/summarizer';
-import { ContactForm } from '@/components/contact-form';
+import { LeaveApplicationForm } from '@/components/leave-application-form';
 
 export default function Home() {
   return (
@@ -10,10 +7,7 @@ export default function Home() {
       <PageHeader />
       <main className="flex-1 container mx-auto px-4 py-10 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto space-y-12">
-          <DocumentInfo />
-          <ServiceShowcase />
-          <Summarizer />
-          <ContactForm />
+          <LeaveApplicationForm />
         </div>
       </main>
       <footer className="py-6 border-t bg-card">

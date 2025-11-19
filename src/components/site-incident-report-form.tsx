@@ -101,20 +101,20 @@ export function SiteIncidentReportForm() {
           new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
             borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE }, insideHorizontal: { style: BorderStyle.NONE }, insideVertical: { style: BorderStyle.NONE } },
-            rows: [ new TableRow({ children: [ new TableCell({ children: [new Paragraph(`Report No: ${formData.reportNo}`)]}), new TableCell({ children: [new Paragraph(`Date: ${formData.date}`)]}), new TableCell({ children: [new Paragraph(`Rev: ${formData.rev}`)]}) ]}) ]
+            rows: [ new TableRow({ children: [ new TableCell({ children: [new Paragraph({text: `Report No: ${formData.reportNo}`})]}), new TableCell({ children: [new Paragraph({text: `Date: ${formData.date}`})]}), new TableCell({ children: [new Paragraph({text: `Rev: ${formData.rev}`})]}) ]}) ]
           }),
           
           new Paragraph({ text: "" }),
-          new Paragraph({ text: `Report Type: [${formData.reportType === 'siteVisit' ? 'X':' '}] Site Visit [${formData.reportType === 'incident' ? 'X':' '}] Incident [${formData.reportType === 'progress' ? 'X':' '}] Progress [${formData.reportType === 'technical' ? 'X':' '}] Technical [${formData.reportType === 'audit' ? 'X':' '}] Audit [${formData.reportType === 'other' ? 'X':' '}] Other: ${formData.otherReportType}`}),
+          new Paragraph({ text: `Report Type: [${formData.reportType === 'siteVisit' ? 'X':' '}] Site Visit  [${formData.reportType === 'incident' ? 'X':' '}] Incident  [${formData.reportType === 'progress' ? 'X':' '}] Progress  [${formData.reportType === 'technical' ? 'X':' '}] Technical  [${formData.reportType === 'audit' ? 'X':' '}] Audit  [${formData.reportType === 'other' ? 'X':' '}] Other: ${formData.otherReportType}`}),
           new Paragraph({ text: "" }),
           
           new Table({
              width: { size: 100, type: WidthType.PERCENTAGE },
              borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE }, insideHorizontal: { style: BorderStyle.NONE }, insideVertical: { style: BorderStyle.NONE } },
              rows: [
-                 new TableRow({ children: [ new TableCell({ children: [new Paragraph(`Project / Site Name: ${formData.projectSiteName}`)] }) ]}),
-                 new TableRow({ children: [ new TableCell({ children: [new Paragraph(`Client: ${formData.client}`)] }), new TableCell({ children: [new Paragraph(`Report Prepared By: ${formData.reportPreparedBy}`)] }) ]}),
-                 new TableRow({ children: [ new TableCell({ children: [new Paragraph(`Date of Event/Visit: ${formData.dateOfEvent}`)] }), new TableCell({ children: [new Paragraph(`Location: ${formData.location}`)] }) ]}),
+                 new TableRow({ children: [ new TableCell({ children: [new Paragraph({text: `Project / Site Name: ${formData.projectSiteName}`})] }) ]}),
+                 new TableRow({ children: [ new TableCell({ children: [new Paragraph({text: `Client: ${formData.client}`})] }), new TableCell({ children: [new Paragraph({text: `Report Prepared By: ${formData.reportPreparedBy}`})] }) ]}),
+                 new TableRow({ children: [ new TableCell({ children: [new Paragraph({text: `Date of Event/Visit: ${formData.dateOfEvent}`})] }), new TableCell({ children: [new Paragraph({text: `Location: ${formData.location}`})] }) ]}),
              ]
           }),
 
@@ -183,16 +183,16 @@ export function SiteIncidentReportForm() {
                 children: [
                   new TableCell({
                     children: [
-                      new Paragraph(`Prepared By: ${formData.preparedBy}`),
+                      new Paragraph({text: `Prepared By: ${formData.preparedBy}`}),
                       new Paragraph({ children: [new ImageRun({ data: preparedBySig, transformation: { width: 150, height: 75 } })] }),
-                      new Paragraph(`Date: ${formData.preparedByDate}`),
+                      new Paragraph({text: `Date: ${formData.preparedByDate}`}),
                     ]
                   }),
                   new TableCell({
                     children: [
-                      new Paragraph(`Reviewed By: ${formData.reviewedBy}`),
-                      ...(reviewedBySig ? [new Paragraph({ children: [new ImageRun({ data: reviewedBySig, transformation: { width: 150, height: 75 } })] })] : [new Paragraph("")]),
-                      new Paragraph(`Date: ${formData.reviewedByDate}`),
+                      new Paragraph({text: `Reviewed By: ${formData.reviewedBy}`}),
+                      ...(reviewedBySig ? [new Paragraph({ children: [new ImageRun({ data: reviewedBySig, transformation: { width: 150, height: 75 } })] })] : [new Paragraph("") ]),
+                      new Paragraph({text: `Date: ${formData.reviewedByDate}`}),
                     ]
                   }),
                 ]
@@ -252,7 +252,7 @@ export function SiteIncidentReportForm() {
                 </thead>
                 <tbody>
                     {issues.map((row, i) => (
-                        <tr key={i}><td className="p-1">{i + 1}</td><td className="p-1"><Input name="issue" value={row.issue} onChange={handleTableChange(setIssues)(i)} /></td><td className="p-1"><Input name="risk" value={row.risk} onChange={handleTableChange(setIssues)(i)} /></td><td className="p-1"><Input name="action" value={row.action} onChange={handleTableChange(setIssues)(i)} /></td></tr>
+                        <tr key={i}><td className="p-1">{i + 1}</td><td className="p-1"><Input name="issue" value={row.issue} onChange={(e) => handleTableChange(setIssues)(i, e)} /></td><td className="p-1"><Input name="risk" value={row.risk} onChange={(e) => handleTableChange(setIssues)(i, e)} /></td><td className="p-1"><Input name="action" value={row.action} onChange={(e) => handleTableChange(setIssues)(i, e)} /></td></tr>
                     ))}
                 </tbody>
             </table>
@@ -269,7 +269,7 @@ export function SiteIncidentReportForm() {
                 </thead>
                 <tbody>
                     {actions.map((row, i) => (
-                        <tr key={i}><td className="p-1">{i + 1}</td><td className="p-1"><Input name="action" value={row.action} onChange={handleTableChange(setActions)(i)} /></td><td className="p-1"><Input name="responsible" value={row.responsible} onChange={handleTableChange(setActions)(i)} /></td><td className="p-1"><Input name="due" type="date" value={row.due} onChange={handleTableChange(setActions)(i)} /></td></tr>
+                        <tr key={i}><td className="p-1">{i + 1}</td><td className="p-1"><Input name="action" value={row.action} onChange={(e) => handleTableChange(setActions)(i, e)} /></td><td className="p-1"><Input name="responsible" value={row.responsible} onChange={(e) => handleTableChange(setActions)(i, e)} /></td><td className="p-1"><Input name="due" type="date" value={row.due} onChange={(e) => handleTableChange(setActions)(i, e)} /></td></tr>
                     ))}
                 </tbody>
             </table>

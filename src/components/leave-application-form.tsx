@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { SignaturePad } from "@/components/signature-pad";
 import SignatureCanvas from "react-signature-canvas";
-import { Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, WidthType, BorderStyle } from "docx";
+import { Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, WidthType, BorderStyle, HeadingLevel } from "docx";
 import { saveAs } from "file-saver";
 import { Textarea } from "./ui/textarea";
 
@@ -79,13 +79,14 @@ export function LeaveApplicationForm() {
     const doc = new Document({
       sections: [{
         children: [
-          new Paragraph({ text: "LEAVE APPLICATION FORM", heading: "Title", alignment: "center" }),
+          new Paragraph({ text: "LEAVE APPLICATION FORM", heading: HeadingLevel.TITLE, alignment: "center" }),
           new Paragraph({ text: "" }),
           new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
+            borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE }, insideHorizontal: { style: BorderStyle.NONE }, insideVertical: { style: BorderStyle.NONE } },
             rows: [
-              new TableRow({ children: [new TableCell({ children: [new Paragraph("Application Date:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.applicationDate)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph("Employee ID:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.employeeId)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } })] }),
-              new TableRow({ children: [new TableCell({ children: [new Paragraph("Employee Name:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.employeeName)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph("Department:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.department)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } })] }),
+              new TableRow({ children: [new TableCell({ children: [new Paragraph("Application Date:")] }), new TableCell({ children: [new Paragraph(formData.applicationDate)] }), new TableCell({ children: [new Paragraph("Employee ID:")] }), new TableCell({ children: [new Paragraph(formData.employeeId)] })] }),
+              new TableRow({ children: [new TableCell({ children: [new Paragraph("Employee Name:")] }), new TableCell({ children: [new Paragraph(formData.employeeName)] }), new TableCell({ children: [new Paragraph("Department:")] }), new TableCell({ children: [new Paragraph(formData.department)] })] }),
             ]
           }),
           new Paragraph({ text: "" }),
@@ -97,8 +98,16 @@ export function LeaveApplicationForm() {
           new Paragraph({ text: "Leave Period:", bold: true }),
            new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
+            borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE }, insideHorizontal: { style: BorderStyle.NONE }, insideVertical: { style: BorderStyle.NONE } },
             rows: [
-              new TableRow({ children: [new TableCell({ children: [new Paragraph("From:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.leaveFrom)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph("To:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.leaveTo)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph("Number of working days:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.workingDays)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } })] }),
+              new TableRow({ children: [
+                  new TableCell({ children: [new Paragraph("From:")] }), 
+                  new TableCell({ children: [new Paragraph(formData.leaveFrom)] }), 
+                  new TableCell({ children: [new Paragraph("To:")] }), 
+                  new TableCell({ children: [new Paragraph(formData.leaveTo)] }), 
+                  new TableCell({ children: [new Paragraph("Number of working days:")] }), 
+                  new TableCell({ children: [new Paragraph(formData.workingDays)] })
+              ]}),
             ]
           }),
           new Paragraph({ text: "" }),
@@ -229,5 +238,3 @@ export function LeaveApplicationForm() {
     </Card>
   );
 }
-
-    

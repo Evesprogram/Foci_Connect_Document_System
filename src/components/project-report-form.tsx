@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { SignaturePad } from "@/components/signature-pad";
 import SignatureCanvas from "react-signature-canvas";
-import { Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, WidthType, BorderStyle } from "docx";
+import { Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, WidthType, BorderStyle, HeadingLevel } from "docx";
 import { saveAs } from "file-saver";
 
 const Section = ({ title, name, value, onChange }: { title: string; name: string; value: string; onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void; }) => (
@@ -79,18 +79,55 @@ export function ProjectReportForm() {
         new Paragraph({ text: title, bold: true, spacing: { before: 200 } }),
         ...content.split('\n').map(p => new Paragraph({ text: p })),
     ];
+    
+    const signatureTable = new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        borders: {
+            top: { style: BorderStyle.NONE },
+            bottom: { style: BorderStyle.NONE },
+            left: { style: BorderStyle.NONE },
+            right: { style: BorderStyle.NONE },
+            insideHorizontal: { style: BorderStyle.NONE },
+            insideVertical: { style: BorderStyle.NONE },
+        },
+        rows: [
+            new TableRow({ 
+                children: [
+                    new TableCell({ 
+                        children: [
+                            new Paragraph("Prepared By:"), 
+                            new Paragraph(formData.preparedBy), 
+                            new Paragraph({ text: "" }), 
+                            new Paragraph({ children: [new ImageRun({ data: preparedBySig, transformation: { width: 150, height: 75 } })] }), 
+                            new Paragraph(`Date: ${formData.preparedByDate}`)
+                        ] 
+                    }), 
+                    new TableCell({ 
+                        children: [
+                            new Paragraph("Reviewed By:"), 
+                            new Paragraph(formData.reviewedBy), 
+                            new Paragraph({ text: "" }), 
+                            ...(reviewedBySig ? [new Paragraph({ children: [new ImageRun({ data: reviewedBySig, transformation: { width: 150, height: 75 } })] })] : [new Paragraph("") ]), 
+                            new Paragraph(`Date: ${formData.reviewedByDate}`)
+                        ]
+                    })
+                ] 
+            }),
+        ]
+    });
+
 
     const doc = new Document({
       sections: [{
         children: [
-          new Paragraph({ text: "MONTHLY / PROJECT REPORT", heading: "Title", alignment: "center" }),
+          new Paragraph({ text: "MONTHLY / PROJECT REPORT", heading: HeadingLevel.TITLE, alignment: "center" }),
           new Paragraph({ text: "" }),
           new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
             rows: [
-                new TableRow({ children: [new TableCell({ children: [new Paragraph("Report Title:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.reportTitle)], columnSpan: 3, borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } })] }),
-                new TableRow({ children: [new TableCell({ children: [new Paragraph("Prepared By:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.preparedBy)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph("Department:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.department)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } })] }),
-                new TableRow({ children: [new TableCell({ children: [new Paragraph("Report Period:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(`From ${formData.periodFrom} To ${formData.periodTo}`)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph("Date Submitted:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.dateSubmitted)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } })] }),
+                new TableRow({ children: [new TableCell({ children: [new Paragraph("Report Title:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.reportTitle)], columnSpan: 3, borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } })] }),
+                new TableRow({ children: [new TableCell({ children: [new Paragraph("Prepared By:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.preparedBy)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph("Department:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.department)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } })] }),
+                new TableRow({ children: [new TableCell({ children: [new Paragraph("Report Period:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(`From ${formData.periodFrom} To ${formData.periodTo}`)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph("Date Submitted:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.dateSubmitted)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } })] }),
             ]
           }),
           new Paragraph({ text: "" }),
@@ -100,12 +137,7 @@ export function ProjectReportForm() {
           ...createSection("4. Financial / Resource Summary (if applicable)", formData.financialSummary),
           ...createSection("5. Planned Activities for Next Period", formData.plannedActivities),
           new Paragraph({ text: "", spacing: { before: 400 } }),
-           new Table({
-               width: { size: 100, type: WidthType.PERCENTAGE },
-               rows: [
-                   new TableRow({ children: [new TableCell({ children: [new Paragraph("Prepared By:"), new Paragraph(formData.preparedBy), new Paragraph({ text: "" }), new Paragraph({ children: [new ImageRun({ data: preparedBySig, transformation: { width: 150, height: 75 } })] }), new Paragraph(`Date: ${formData.preparedByDate}`)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph("Reviewed By:"), new Paragraph(formData.reviewedBy), new Paragraph({ text: "" }), ...(reviewedBySig ? [new Paragraph({ children: [new ImageRun({ data: reviewedBySig, transformation: { width: 150, height: 75 } })] })] : [new Paragraph("") ]), new Paragraph(`Date: ${formData.reviewedByDate}`)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } })] }),
-               ]
-           })
+          signatureTable
         ]
       }]
     });

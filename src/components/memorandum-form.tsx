@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { SignaturePad } from "@/components/signature-pad";
 import SignatureCanvas from "react-signature-canvas";
-import { Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, WidthType, BorderStyle } from "docx";
+import { Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, WidthType, BorderStyle, HeadingLevel } from "docx";
 import { saveAs } from "file-saver";
 
 const MemoInputRow = ({ label, id, value, onChange }: { label: string; id: string; value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; }) => (
@@ -48,14 +48,10 @@ export function MemorandumForm() {
   };
 
   const handleExport = async () => {
-    if (sigPadRef.current?.isEmpty()) {
-      alert("Please provide a signature before exporting.");
-      return;
-    }
     const sigImageBase64 = sigPadRef.current?.getTrimmedCanvas().toDataURL("image/png").split(",")[1];
     
     if (!sigImageBase64) {
-      alert("Could not get signature image.");
+      alert("Please provide a signature before exporting.");
       return;
     }
 
@@ -64,7 +60,7 @@ export function MemorandumForm() {
     const doc = new Document({
       sections: [{
         children: [
-          new Paragraph({ text: "MEMORANDUM", heading: "Title", alignment: "center" }),
+          new Paragraph({ text: "MEMORANDUM", heading: HeadingLevel.TITLE, alignment: "center" }),
           new Paragraph({ text: "" }),
           new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
@@ -100,10 +96,10 @@ export function MemorandumForm() {
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-4 border-b pb-6">
-            <MemoInputRow label="To" id="to" value={formData.to} onChange={handleInputChange} />
-            <MemoInputRow label="From" id="from" value={formData.from} onChange={handleInputChange} />
-            <MemoInputRow label="Date" id="date" value={formData.date} onChange={handleInputChange} />
-            <MemoInputRow label="Subject" id="subject" value={formData.subject} onChange={handleInputChange} />
+            <MemoInputRow label="To" id="to" value={formData.to} onChange={handleInputChange as any} />
+            <MemoInputRow label="From" id="from" value={formData.from} onChange={handleInputChange as any} />
+            <MemoInputRow label="Date" id="date" value={formData.date} onChange={handleInputChange as any} />
+            <MemoInputRow label="Subject" id="subject" value={formData.subject} onChange={handleInputChange as any} />
         </div>
         
         <div className="pt-6">
@@ -120,7 +116,7 @@ export function MemorandumForm() {
 
         <div className="space-y-2 pt-6 border-t">
             <Label htmlFor="actionRequired">Action Required:</Label>
-            <Input id="actionRequired" name="actionRequired" value={formData.actionRequired} onChange={handleInputChange} />
+            <Input id="actionRequired" name="actionRequired" value={formData.actionRequired} onChange={handleInputChange as any} />
         </div>
 
       </CardContent>
@@ -129,7 +125,7 @@ export function MemorandumForm() {
                 <SignaturePad sigPadRef={sigPadRef} />
                  <div className="grid w-full max-w-xs items-center gap-1.5">
                     <Label htmlFor="signatureDate">Date</Label>
-                    <Input id="signatureDate" name="signatureDate" type="date" value={formData.signatureDate} onChange={handleInputChange} />
+                    <Input id="signatureDate" name="signatureDate" type="date" value={formData.signatureDate} onChange={handleInputChange as any} />
                 </div>
             </div>
              <Button onClick={handleExport}>Export to Word</Button>

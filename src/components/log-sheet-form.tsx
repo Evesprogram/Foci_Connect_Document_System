@@ -8,12 +8,12 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { SignaturePad } from "@/components/signature-pad";
 import SignatureCanvas from "react-signature-canvas";
-import { Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, WidthType, BorderStyle } from "docx";
+import { Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, WidthType, BorderStyle, HeadingLevel } from "docx";
 import { saveAs } from "file-saver";
 import { Textarea } from "./ui/textarea";
 
 const initialRows = Array.from({ length: 7 }, () => ({
-  date: "", timeIn: "", timeOut: "", totalHours: "", tasks: "", remarks: "", signature: ""
+  date: "", timeIn: "", timeOut: "", totalHours: "", tasks: "", remarks: "",
 }));
 
 const base64ToArrayBuffer = (base64: string) => {
@@ -78,38 +78,54 @@ export function LogSheetForm() {
     const employeeSignature = base64ToArrayBuffer(employeeSignatureBase64);
     const supervisorSignature = supervisorSignatureBase64 ? base64ToArrayBuffer(supervisorSignatureBase64) : null;
 
+    const tableHeader = new TableRow({
+      children: [
+        new TableCell({ children: [new Paragraph({text: "Date", bold: true})] }),
+        new TableCell({ children: [new Paragraph({text: "Time In", bold: true})] }),
+        new TableCell({ children: [new Paragraph({text: "Time Out", bold: true})] }),
+        new TableCell({ children: [new Paragraph({text: "Total Hours", bold: true})] }),
+        new TableCell({ children: [new Paragraph({text: "Role / Tasks", bold: true})] }),
+        new TableCell({ children: [new Paragraph({text: "Remarks", bold: true})] }),
+      ],
+    });
+
+    const dataRows = rows.map(row => 
+      new TableRow({
+        children: [
+          new TableCell({ children: [new Paragraph(row.date)] }),
+          new TableCell({ children: [new Paragraph(row.timeIn)] }),
+          new TableCell({ children: [new Paragraph(row.timeOut)] }),
+          new TableCell({ children: [new Paragraph(row.totalHours)] }),
+          new TableCell({ children: [new Paragraph(row.tasks)] }),
+          new TableCell({ children: [new Paragraph(row.remarks)] }),
+        ],
+      })
+    );
+
     const table = new Table({
       width: { size: 100, type: WidthType.PERCENTAGE },
-      rows: [
-        new TableRow({
-          children: ["Date", "Time In", "Time Out", "Total Hours", "Role / Tasks", "Remarks"].map(text => new TableCell({ children: [new Paragraph({ text, bold: true })] })),
-        }),
-        ...rows.map(row => 
-          new TableRow({
-            children: [
-              new TableCell({ children: [new Paragraph(row.date)] }),
-              new TableCell({ children: [new Paragraph(row.timeIn)] }),
-              new TableCell({ children: [new Paragraph(row.timeOut)] }),
-              new TableCell({ children: [new Paragraph(row.totalHours)] }),
-              new TableCell({ children: [new Paragraph(row.tasks)] }),
-              new TableCell({ children: [new Paragraph(row.remarks)] }),
-            ],
-          })
-        )
-      ]
+      rows: [tableHeader, ...dataRows]
     });
 
     const doc = new Document({
       sections: [{
         children: [
-          new Paragraph({ text: "EMPLOYEE DAILY / WEEKLY LOG SHEET", heading: "Title", alignment: "center" }),
+          new Paragraph({ text: "EMPLOYEE DAILY / WEEKLY LOG SHEET", heading: HeadingLevel.TITLE, alignment: "center" }),
           new Paragraph({ text: "" }),
           new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
+            borders: {
+                top: { style: BorderStyle.NONE },
+                bottom: { style: BorderStyle.NONE },
+                left: { style: BorderStyle.NONE },
+                right: { style: BorderStyle.NONE },
+                insideHorizontal: { style: BorderStyle.NONE },
+                insideVertical: { style: BorderStyle.NONE },
+            },
             rows: [
-                new TableRow({ children: [new TableCell({ children: [new Paragraph("Month/Year:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.monthYear)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph("Project/Site:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.projectSite)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } })] }),
-                new TableRow({ children: [new TableCell({ children: [new Paragraph("Employee Name:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.employeeName)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph("Employee ID:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.employeeId)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } })] }),
-                new TableRow({ children: [new TableCell({ children: [new Paragraph("Role:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.role)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph("Department:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.department)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } })] }),
+                new TableRow({ children: [new TableCell({ children: [new Paragraph("Month/Year:")] }), new TableCell({ children: [new Paragraph(formData.monthYear)] }), new TableCell({ children: [new Paragraph("Project/Site:")] }), new TableCell({ children: [new Paragraph(formData.projectSite)] })] }),
+                new TableRow({ children: [new TableCell({ children: [new Paragraph("Employee Name:")] }), new TableCell({ children: [new Paragraph(formData.employeeName)] }), new TableCell({ children: [new Paragraph("Employee ID:")] }), new TableCell({ children: [new Paragraph(formData.employeeId)] })] }),
+                new TableRow({ children: [new TableCell({ children: [new Paragraph("Role:")] }), new TableCell({ children: [new Paragraph(formData.role)] }), new TableCell({ children: [new Paragraph("Department:")] }), new TableCell({ children: [new Paragraph(formData.department)] })] }),
             ]
           }),
           new Paragraph({ text: "" }),

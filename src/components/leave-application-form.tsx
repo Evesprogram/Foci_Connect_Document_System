@@ -47,7 +47,9 @@ export function LeaveApplicationForm() {
   const handleExport = async () => {
     const getSignatureImage = (ref: React.RefObject<SignatureCanvas>) => {
       if (ref.current && !ref.current.isEmpty()) {
-        return ref.current.getTrimmedCanvas().toDataURL("image/png").split(",")[1];
+        const dataUrl = ref.current.getTrimmedCanvas().toDataURL("image/png");
+        // Return only the base64 part of the data URL
+        return dataUrl.split(",")[1];
       }
       return null;
     };
@@ -214,3 +216,5 @@ export function LeaveApplicationForm() {
     </Card>
   );
 }
+
+    

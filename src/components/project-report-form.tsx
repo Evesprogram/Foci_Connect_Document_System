@@ -48,7 +48,8 @@ export function ProjectReportForm() {
   const handleExport = async () => {
     const getSignatureImage = (ref: React.RefObject<SignatureCanvas>) => {
       if (ref.current && !ref.current.isEmpty()) {
-        return ref.current.getTrimmedCanvas().toDataURL("image/png").split(",")[1];
+        const dataUrl = ref.current.getTrimmedCanvas().toDataURL("image/png");
+        return dataUrl.split(",")[1];
       }
       return null;
     };
@@ -159,3 +160,5 @@ export function ProjectReportForm() {
     </Card>
   );
 }
+
+    

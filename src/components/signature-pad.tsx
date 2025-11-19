@@ -8,16 +8,17 @@ import { Label } from "./ui/label";
 
 interface SignaturePadProps {
   sigPadRef: React.RefObject<SignatureCanvas>;
+  title?: string;
 }
 
-export function SignaturePad({ sigPadRef }: SignaturePadProps) {
+export function SignaturePad({ sigPadRef, title = "Signature" }: SignaturePadProps) {
   const clearSignature = () => {
     sigPadRef.current?.clear();
   };
 
   return (
     <div className="grid w-full max-w-sm items-center gap-1.5">
-      <Label htmlFor="signature">Signature</Label>
+      <Label htmlFor="signature">{title}</Label>
       <div className="rounded-md border border-input bg-background">
         <SignatureCanvas
           ref={sigPadRef}

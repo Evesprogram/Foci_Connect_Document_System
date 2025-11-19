@@ -18,10 +18,15 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { handleContactSubmit, type ContactFormState } from "@/app/actions";
+import { handleContactSubmit, type ContactFormState, handleSummarize, type SummarizerState } from "@/app/actions";
+import { useFormState, useFormStatus } from "react-dom";
+
+import { Document, Packer, Paragraph, TextRun, HeadingLevel } from "docx";
+import { saveAs } from "file-saver";
+import { FociLogo } from "./foci-logo";
 
 
-const formSchema = z.object({
+const contactFormSchema = z.object({
   name: z.string().min(2, {
     message: "Name must be at least 2 characters.",
   }),
@@ -36,8 +41,8 @@ const formSchema = z.object({
 function ContactForm() {
     const { toast } = useToast();
 
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
+    const form = useForm<z.infer<typeof contactFormSchema>>({
+        resolver: zodResolver(contactFormSchema),
         defaultValues: {
             name: "",
             email: "",
@@ -45,7 +50,7 @@ function ContactForm() {
         },
     });
 
-    async function onSubmit(values: z.infer<typeof formSchema>) {
+    async function onSubmit(values: z.infer<typeof contactFormSchema>) {
         const result: ContactFormState = await handleContactSubmit(values);
         if (result.success) {
             toast({
@@ -128,7 +133,89 @@ const ServiceCard = ({ icon, title, description }: { icon: React.ReactNode, titl
     </div>
 )
 
+
+function Summarizer() {
+  const initialState: SummarizerState = { summary: '', progress: '' };
+  const [state, formAction] = useFormState(handleSummarize, initialState);
+  const { pending } = useFormStatus();
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Document Summarizer</CardTitle>
+        <CardDescription>
+          Paste any document content below and our AI will generate a concise summary for you.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form action={formAction} className="space-y-4">
+          <Textarea
+            name="content"
+            placeholder="Paste your document content here..."
+            className="resize-y"
+            rows={8}
+          />
+          {state.error && <p className="text-sm font-medium text-destructive">{state.error}</p>}
+          <Button type="submit" className="w-full" disabled={pending}>
+            {pending ? 'Summarizing...' : 'Summarize Content'}
+          </Button>
+        </form>
+        {(state.summary || state.progress) && (
+            <div className="mt-6 space-y-4 rounded-lg border bg-secondary/50 p-4">
+                {state.progress && <p className="text-sm text-muted-foreground">{state.progress}</p>}
+                {state.summary && (
+                    <div>
+                        <h4 className="font-semibold text-foreground">Summary:</h4>
+                        <p className="text-sm text-foreground whitespace-pre-wrap">{state.summary}</p>
+                    </div>
+                )}
+            </div>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
 export function HomePage() {
+  
+  const handleExport = async () => {
+    const doc = new Document({
+      sections: [{
+        children: [
+          new Paragraph({ text: "FOCI GROUP", heading: HeadingLevel.TITLE, alignment: "center" }),
+          new Paragraph({ text: "Engineering | ICT | Smart Automation", alignment: "center" }),
+          new Paragraph({ text: "" }),
+          
+          new Paragraph({ text: "Integrated Solutions for a Modern World", heading: HeadingLevel.HEADING_1, alignment: "center" }),
+          new Paragraph({ text: "FOCI Group delivers excellence in Engineering, ICT, and Smart Automation, providing innovative and reliable solutions tailored to your needs.", alignment: "center" }),
+          new Paragraph({ text: "" }),
+
+          new Paragraph({ text: "Our Services", heading: HeadingLevel.HEADING_2 }),
+          
+          new Paragraph({ text: "Engineering", style: "IntenseQuote" }),
+          new Paragraph({ text: "Providing top-tier engineering solutions across various sectors, ensuring quality, safety, and efficiency in every project." }),
+          new Paragraph({ text: "" }),
+          
+          new Paragraph({ text: "ICT", style: "IntenseQuote" }),
+          new Paragraph({ text: "Delivering robust Information and Communications Technology infrastructure, services, and support to keep your business connected." }),
+          new Paragraph({ text: "" }),
+          
+          new Paragraph({ text: "Smart Automation", style: "IntenseQuote" }),
+          new Paragraph({ text: "Implementing intelligent automation systems to streamline operations, increase productivity, and drive business growth." }),
+          new Paragraph({ text: "" }),
+
+          new Paragraph({ text: "Contact Information", heading: HeadingLevel.HEADING_2 }),
+          new Paragraph({ children: [new TextRun({ text: "Office: ", bold: true }), new TextRun("152 Dallas Avenue, Waterkloof Glen, Pretoria, 0010, South Africa")] }),
+          new Paragraph({ children: [new TextRun({ text: "Phone: ", bold: true }), new TextRun("+27 12 943 6048")] }),
+          new Paragraph({ children: [new TextRun({ text: "Email: ", bold: true }), new TextRun("info@foci.group")] }),
+        ]
+      }]
+    });
+
+    const blob = await Packer.toBlob(doc);
+    saveAs(blob, "FociGroup-CompanyProfile.docx");
+  };
+
   return (
     <div className="space-y-16">
         <section className="text-center">
@@ -138,6 +225,9 @@ export function HomePage() {
             <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
                 FOCI Group delivers excellence in Engineering, ICT, and Smart Automation, providing innovative and reliable solutions tailored to your needs.
             </p>
+             <div className="mt-6 flex justify-center">
+                <Button onClick={handleExport}>Export Company Profile to Word</Button>
+            </div>
         </section>
         
         <section>
@@ -160,8 +250,8 @@ export function HomePage() {
             </div>
         </section>
 
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-             <Card>
+        <section className="grid grid-cols-1 lg:grid-cols-5 gap-12 items-start">
+             <Card className="lg:col-span-2">
                 <CardHeader>
                     <CardTitle>Get In Touch</CardTitle>
                     <CardDescription>
@@ -172,34 +262,38 @@ export function HomePage() {
                     <ContactForm />
                 </CardContent>
             </Card>
-            <div className="space-y-6">
-                <h2 className="text-3xl font-headline font-bold">Contact Information</h2>
-                <div className="space-y-4 text-muted-foreground">
-                    <div className="flex items-start gap-4">
-                        <Building className="h-6 w-6 text-primary mt-1 flex-shrink-0" />
-                        <div>
-                            <h4 className="font-semibold text-foreground">Our Office</h4>
-                            <p>152 Dallas Avenue, Waterkloof Glen</p>
-                            <p>Pretoria, 0010, South Africa</p>
+            <div className="lg:col-span-3 space-y-6">
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-4 text-muted-foreground">
+                        <div className="flex items-start gap-4">
+                            <Building className="h-6 w-6 text-primary mt-1 flex-shrink-0" />
+                            <div>
+                                <h4 className="font-semibold text-foreground">Our Office</h4>
+                                <p>152 Dallas Avenue, Waterkloof Glen</p>
+                                <p>Pretoria, 0010, South Africa</p>
+                            </div>
                         </div>
-                    </div>
-                     <div className="flex items-start gap-4">
-                        <Phone className="h-6 w-6 text-primary mt-1 flex-shrink-0" />
-                        <div>
-                            <h4 className="font-semibold text-foreground">Phone</h4>
-                            <p>+27 12 943 6048</p>
+                        <div className="flex items-start gap-4">
+                            <Phone className="h-6 w-6 text-primary mt-1 flex-shrink-0" />
+                            <div>
+                                <h4 className="font-semibold text-foreground">Phone</h4>
+                                <p>+27 12 943 6048</p>
+                            </div>
                         </div>
-                    </div>
-                    <div className="flex items-start gap-4">
-                        <Mail className="h-6 w-6 text-primary mt-1 flex-shrink-0" />
-                        <div>
-                            <h4 className="font-semibold text-foreground">Email</h4>
-                            <p>info@foci.group</p>
+                        <div className="flex items-start gap-4">
+                            <Mail className="h-6 w-6 text-primary mt-1 flex-shrink-0" />
+                            <div>
+                                <h4 className="font-semibold text-foreground">Email</h4>
+                                <p>info@foci.group</p>
+                            </div>
                         </div>
                     </div>
                 </div>
+                 <Summarizer />
             </div>
         </section>
     </div>
   );
 }
+
+    

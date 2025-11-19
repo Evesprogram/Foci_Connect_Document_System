@@ -42,9 +42,8 @@ export function MemorandumForm() {
       alert("Please provide a signature before exporting.");
       return;
     }
-    const sigImage = sigPadRef.current?.getTrimmedCanvas().toDataURL("image/png");
-    const base64Image = sigImage!.split(",")[1];
-
+    const sigImage = sigPadRef.current?.getTrimmedCanvas().toDataURL("image/png").split(",")[1];
+    
     const doc = new Document({
       sections: [
         {
@@ -78,7 +77,7 @@ export function MemorandumForm() {
             new Paragraph({
                 children: [
                     new ImageRun({
-                        data: base64Image,
+                        data: sigImage,
                         transformation: {
                             width: 200,
                             height: 100,
@@ -143,5 +142,3 @@ export function MemorandumForm() {
     </Card>
   );
 }
-
-    

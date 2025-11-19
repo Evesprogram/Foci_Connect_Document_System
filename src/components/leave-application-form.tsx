@@ -13,6 +13,16 @@ import { Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableC
 import { saveAs } from "file-saver";
 import { Textarea } from "./ui/textarea";
 
+const base64ToArrayBuffer = (base64: string) => {
+  const binary_string = window.atob(base64);
+  const len = binary_string.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binary_string.charCodeAt(i);
+  }
+  return bytes.buffer;
+};
+
 export function LeaveApplicationForm() {
   const [formData, setFormData] = useState({
     applicationDate: "",
@@ -48,20 +58,23 @@ export function LeaveApplicationForm() {
     const getSignatureImage = (ref: React.RefObject<SignatureCanvas>) => {
       if (ref.current && !ref.current.isEmpty()) {
         const dataUrl = ref.current.getTrimmedCanvas().toDataURL("image/png");
-        // Return only the base64 part of the data URL
         return dataUrl.split(",")[1];
       }
       return null;
     };
 
-    const employeeSignature = getSignatureImage(employeeSigRef);
-    const supervisorSignature = getSignatureImage(supervisorSigRef);
-    const hrSignature = getSignatureImage(hrSigRef);
+    const employeeSignatureBase64 = getSignatureImage(employeeSigRef);
+    const supervisorSignatureBase64 = getSignatureImage(supervisorSigRef);
+    const hrSignatureBase64 = getSignatureImage(hrSigRef);
 
-    if (!employeeSignature) {
+    if (!employeeSignatureBase64) {
       alert("Please provide the employee's signature.");
       return;
     }
+
+    const employeeSignature = base64ToArrayBuffer(employeeSignatureBase64);
+    const supervisorSignature = supervisorSignatureBase64 ? base64ToArrayBuffer(supervisorSignatureBase64) : null;
+    const hrSignature = hrSignatureBase64 ? base64ToArrayBuffer(hrSignatureBase64) : null;
 
     const doc = new Document({
       sections: [{
@@ -100,12 +113,12 @@ export function LeaveApplicationForm() {
           new Paragraph({ text: "" }),
           new Paragraph({ text: "Supervisor/Manager Recommendation:", bold: true }),
           new Paragraph({ children: [new TextRun({ text: "Signature:", bold: true })] }),
-          ...(supervisorSignature ? [new Paragraph({ children: [new ImageRun({ data: supervisorSignature, transformation: { width: 150, height: 75 } })] })] : []),
+          ...(supervisorSignature ? [new Paragraph({ children: [new ImageRun({ data: supervisorSignature, transformation: { width: 150, height: 75 } })] })] : [new Paragraph('')]),
           new Paragraph({ children: [new TextRun({ text: `Date: ${formData.supervisorSignatureDate}` })] }),
           new Paragraph({ text: "" }),
           new Paragraph({ text: "HR / Director Final Approval:", bold: true }),
           new Paragraph({ children: [new TextRun({ text: "Signature:", bold: true })] }),
-          ...(hrSignature ? [new Paragraph({ children: [new ImageRun({ data: hrSignature, transformation: { width: 150, height: 75 } })] })] : []),
+          ...(hrSignature ? [new Paragraph({ children: [new ImageRun({ data: hrSignature, transformation: { width: 150, height: 75 } })] })] : [new Paragraph('')]),
           new Paragraph({ children: [new TextRun({ text: `Date: ${formData.hrSignatureDate}` })] }),
         ]
       }]

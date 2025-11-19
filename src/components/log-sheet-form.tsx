@@ -16,6 +16,16 @@ const initialRows = Array.from({ length: 7 }, () => ({
   date: "", timeIn: "", timeOut: "", totalHours: "", tasks: "", remarks: "", signature: ""
 }));
 
+const base64ToArrayBuffer = (base64: string) => {
+  const binary_string = window.atob(base64);
+  const len = binary_string.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binary_string.charCodeAt(i);
+  }
+  return bytes.buffer;
+};
+
 export function LogSheetForm() {
   const [formData, setFormData] = useState({
     monthYear: "",
@@ -57,13 +67,16 @@ export function LogSheetForm() {
       return null;
     };
     
-    const employeeSignature = getSignatureImage(employeeSigRef);
-    const supervisorSignature = getSignatureImage(supervisorSigRef);
+    const employeeSignatureBase64 = getSignatureImage(employeeSigRef);
+    const supervisorSignatureBase64 = getSignatureImage(supervisorSigRef);
 
-    if (!employeeSignature) {
+    if (!employeeSignatureBase64) {
       alert("Please provide the employee's signature.");
       return;
     }
+
+    const employeeSignature = base64ToArrayBuffer(employeeSignatureBase64);
+    const supervisorSignature = supervisorSignatureBase64 ? base64ToArrayBuffer(supervisorSignatureBase64) : null;
 
     const table = new Table({
       width: { size: 100, type: WidthType.PERCENTAGE },
@@ -112,7 +125,7 @@ export function LogSheetForm() {
           new Paragraph({ text: "Supervisor / Manager Verification:", bold: true }),
           new Paragraph({ children: [new TextRun({ text: `Name: ${formData.supervisorName}\tRole: ${formData.supervisorRole}` })] }),
           new Paragraph({ children: [new TextRun({ text: "Signature:", bold: true })] }),
-          ...(supervisorSignature ? [new Paragraph({ children: [new ImageRun({ data: supervisorSignature, transformation: { width: 150, height: 75 } })] })] : []),
+          ...(supervisorSignature ? [new Paragraph({ children: [new ImageRun({ data: supervisorSignature, transformation: { width: 150, height: 75 } })] })] : [new Paragraph('')]),
           new Paragraph({ children: [new TextRun({ text: `Date: ${formData.supervisorSignatureDate}` })] }),
            new Paragraph({ text: "Comments (if any):", bold: true }),
           ...formData.supervisorComments.split('\n').map(p => new Paragraph({ text: p })),

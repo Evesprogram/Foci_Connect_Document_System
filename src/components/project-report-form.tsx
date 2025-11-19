@@ -19,6 +19,16 @@ const Section = ({ title, name, value, onChange }: { title: string; name: string
     </div>
 );
 
+const base64ToArrayBuffer = (base64: string) => {
+  const binary_string = window.atob(base64);
+  const len = binary_string.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binary_string.charCodeAt(i);
+  }
+  return bytes.buffer;
+};
+
 export function ProjectReportForm() {
   const [formData, setFormData] = useState({
     reportTitle: "",
@@ -54,14 +64,17 @@ export function ProjectReportForm() {
       return null;
     };
 
-    const preparedBySig = getSignatureImage(preparedBySigRef);
-    const reviewedBySig = getSignatureImage(reviewedBySigRef);
+    const preparedBySigBase64 = getSignatureImage(preparedBySigRef);
+    const reviewedBySigBase64 = getSignatureImage(reviewedBySigRef);
 
-    if (!preparedBySig) {
+    if (!preparedBySigBase64) {
       alert("Please ensure the 'Prepared By' signature is provided.");
       return;
     }
     
+    const preparedBySig = base64ToArrayBuffer(preparedBySigBase64);
+    const reviewedBySig = reviewedBySigBase64 ? base64ToArrayBuffer(reviewedBySigBase64) : null;
+
     const createSection = (title: string, content: string) => [
         new Paragraph({ text: title, bold: true, spacing: { before: 200 } }),
         ...content.split('\n').map(p => new Paragraph({ text: p })),
@@ -90,7 +103,7 @@ export function ProjectReportForm() {
            new Table({
                width: { size: 100, type: WidthType.PERCENTAGE },
                rows: [
-                   new TableRow({ children: [new TableCell({ children: [new Paragraph("Prepared By:"), new Paragraph(formData.preparedBy), new Paragraph({ text: "" }), new Paragraph({ children: [new ImageRun({ data: preparedBySig, transformation: { width: 150, height: 75 } })] }), new Paragraph(`Date: ${formData.preparedByDate}`)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph("Reviewed By:"), new Paragraph(formData.reviewedBy), new Paragraph({ text: "" }), ...(reviewedBySig ? [new Paragraph({ children: [new ImageRun({ data: reviewedBySig, transformation: { width: 150, height: 75 } })] })] : [new Paragraph("")]), new Paragraph(`Date: ${formData.reviewedByDate}`)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } })] }),
+                   new TableRow({ children: [new TableCell({ children: [new Paragraph("Prepared By:"), new Paragraph(formData.preparedBy), new Paragraph({ text: "" }), new Paragraph({ children: [new ImageRun({ data: preparedBySig, transformation: { width: 150, height: 75 } })] }), new Paragraph(`Date: ${formData.preparedByDate}`)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph("Reviewed By:"), new Paragraph(formData.reviewedBy), new Paragraph({ text: "" }), ...(reviewedBySig ? [new Paragraph({ children: [new ImageRun({ data: reviewedBySig, transformation: { width: 150, height: 75 } })] })] : [new Paragraph("") ]), new Paragraph(`Date: ${formData.reviewedByDate}`)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } })] }),
                ]
            })
         ]

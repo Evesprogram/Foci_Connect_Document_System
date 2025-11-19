@@ -9,7 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { SignaturePad } from "@/components/signature-pad";
 import SignatureCanvas from "react-signature-canvas";
-import jsPDF from "jspdf";
+import { Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, WidthType, BorderStyle } from "docx";
+import { saveAs } from "file-saver";
 
 const MemoInputRow = ({ label, id, value, onChange }: { label: string; id: string; value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; }) => (
     <div className="grid grid-cols-[80px_1fr] items-center gap-4">
@@ -17,6 +18,16 @@ const MemoInputRow = ({ label, id, value, onChange }: { label: string; id: strin
         <Input id={id} name={id} value={value} onChange={onChange} />
     </div>
 );
+
+const base64ToArrayBuffer = (base64: string) => {
+  const binary_string = window.atob(base64);
+  const len = binary_string.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binary_string.charCodeAt(i);
+  }
+  return bytes.buffer;
+};
 
 export function MemorandumForm() {
   const [formData, setFormData] = useState({
@@ -36,85 +47,49 @@ export function MemorandumForm() {
     setFormData(prev => ({ ...prev, [id]: value }));
   };
 
-  const handleExport = () => {
+  const handleExport = async () => {
     if (sigPadRef.current?.isEmpty()) {
       alert("Please provide a signature before exporting.");
       return;
     }
-    const sigImage = sigPadRef.current?.getTrimmedCanvas().toDataURL("image/png");
-
-    const doc = new jsPDF();
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(16);
-    doc.text("MEMORANDUM", doc.internal.pageSize.getWidth() / 2, 20, { align: "center" });
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(12);
-
-    let y = 40;
-    const lineSpacing = 7;
-    const leftMargin = 15;
-    const valueMargin = 40;
-
-    const drawLine = (yPos: number) => {
-        doc.setDrawColor(180, 180, 180);
-        doc.line(valueMargin, yPos + 1, doc.internal.pageSize.getWidth() - leftMargin, yPos + 1);
+    const sigImageBase64 = sigPadRef.current?.getTrimmedCanvas().toDataURL("image/png").split(",")[1];
+    
+    if (!sigImageBase64) {
+      alert("Could not get signature image.");
+      return;
     }
-    
-    doc.text("To:", leftMargin, y);
-    doc.setFont("helvetica", "normal");
-    doc.text(formData.to, valueMargin, y);
-    drawLine(y);
-    y += lineSpacing * 1.5;
 
-    doc.setFont("helvetica", "bold");
-    doc.text("From:", leftMargin, y);
-    doc.setFont("helvetica", "normal");
-    doc.text(formData.from, valueMargin, y);
-    drawLine(y);
-    y += lineSpacing * 1.5;
+    const sigImage = base64ToArrayBuffer(sigImageBase64);
 
-    doc.setFont("helvetica", "bold");
-    doc.text("Date:", leftMargin, y);
-    doc.setFont("helvetica", "normal");
-    doc.text(formData.date, valueMargin, y);
-    drawLine(y);
-    y += lineSpacing * 1.5;
+    const doc = new Document({
+      sections: [{
+        children: [
+          new Paragraph({ text: "MEMORANDUM", heading: "Title", alignment: "center" }),
+          new Paragraph({ text: "" }),
+          new Table({
+            width: { size: 100, type: WidthType.PERCENTAGE },
+            rows: [
+              new TableRow({ children: [new TableCell({ children: [new Paragraph("To:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.to)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } })] }),
+              new TableRow({ children: [new TableCell({ children: [new Paragraph("From:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.from)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } })] }),
+              new TableRow({ children: [new TableCell({ children: [new Paragraph("Date:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.date)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } })] }),
+              new TableRow({ children: [new TableCell({ children: [new Paragraph("Subject:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.subject)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } })] }),
+            ]
+          }),
+          new Paragraph({ text: "" }),
+          ...formData.body.split('\n').map(p => new Paragraph({ text: p })),
+          new Paragraph({ text: "" }),
+          new Paragraph({ text: "Action Required:", bold: true }),
+          new Paragraph({ text: formData.actionRequired }),
+          new Paragraph({ text: "" }),
+          new Paragraph({ children: [new TextRun({ text: "Signature:", bold: true })] }),
+          new Paragraph({ children: [new ImageRun({ data: sigImage, transformation: { width: 150, height: 75 } })] }),
+          new Paragraph({ children: [new TextRun({ text: `Date: ${formData.signatureDate}` })] }),
+        ]
+      }]
+    });
 
-    doc.setFont("helvetica", "bold");
-    doc.text("Subject:", leftMargin, y);
-    doc.setFont("helvetica", "normal");
-    doc.text(formData.subject, valueMargin, y);
-    drawLine(y);
-    y += lineSpacing * 2;
-    
-    doc.setFont("helvetica", "normal");
-    const bodyLines = doc.splitTextToSize(formData.body, doc.internal.pageSize.getWidth() - leftMargin * 2);
-    doc.text(bodyLines, leftMargin, y);
-    y += bodyLines.length * lineSpacing + lineSpacing;
-
-    doc.setFont("helvetica", "bold");
-    doc.text("Action Required:", leftMargin, y);
-    doc.setFont("helvetica", "normal");
-    doc.text(formData.actionRequired, valueMargin + 15, y);
-    drawLine(y);
-    y += lineSpacing * 2;
-
-    doc.setFont("helvetica", "bold");
-    doc.text("Signature:", leftMargin, y);
-    if (sigImage) {
-        doc.addImage(sigImage, "PNG", leftMargin, y + 2, 50, 25);
-    }
-    y += 35;
-    
-    doc.setFont("helvetica", "bold");
-    doc.text(`Date:`, leftMargin, y);
-    doc.setFont("helvetica", "normal");
-    doc.text(formData.signatureDate, leftMargin + 15, y);
-
-
-    doc.save("Memorandum.pdf");
+    const blob = await Packer.toBlob(doc);
+    saveAs(blob, "Memorandum.docx");
   };
 
 
@@ -157,8 +132,10 @@ export function MemorandumForm() {
                     <Input id="signatureDate" name="signatureDate" type="date" value={formData.signatureDate} onChange={handleInputChange} />
                 </div>
             </div>
-             <Button onClick={handleExport}>Export to PDF</Button>
+             <Button onClick={handleExport}>Export to Word</Button>
        </CardFooter>
     </Card>
   );
 }
+
+    

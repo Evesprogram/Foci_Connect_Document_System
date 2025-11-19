@@ -7,11 +7,12 @@ import { MemorandumForm } from '@/components/memorandum-form';
 import { LeaveApplicationForm } from '@/components/leave-application-form';
 import { LogSheetForm } from '@/components/log-sheet-form';
 import { ProjectReportForm } from '@/components/project-report-form';
+import { SiteIncidentReportForm } from '@/components/site-incident-report-form';
 import { Button } from '@/components/ui/button';
 import { HomeIcon, Sheet } from 'lucide-react';
 import { HomePage } from '@/components/home-page';
 
-type DocumentType = 'home' | 'leave' | 'log' | 'report' | 'memorandum';
+type DocumentType = 'home' | 'leave' | 'log' | 'report' | 'memorandum' | 'incident';
 
 const NavButton = ({ active, onClick, children }: { active: boolean, onClick: () => void, children: React.ReactNode }) => (
   <Button
@@ -38,6 +39,8 @@ export default function Home() {
         return <ProjectReportForm />;
       case 'memorandum':
         return <MemorandumForm />;
+      case 'incident':
+        return <SiteIncidentReportForm />;
       default:
         return <HomePage />;
     }
@@ -64,6 +67,10 @@ export default function Home() {
           <NavButton active={activeDocument === 'report'} onClick={() => setActiveDocument('report')}>
             <Sheet className="mr-2 h-4 w-4" />
             Project Report
+          </NavButton>
+           <NavButton active={activeDocument === 'incident'} onClick={() => setActiveDocument('incident')}>
+            <Sheet className="mr-2 h-4 w-4" />
+            Incident Report
           </NavButton>
           <NavButton active={activeDocument === 'memorandum'} onClick={() => setActiveDocument('memorandum')}>
             <Sheet className="mr-2 h-4 w-4" />

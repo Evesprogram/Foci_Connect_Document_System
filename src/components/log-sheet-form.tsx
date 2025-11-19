@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { SignaturePad } from "@/components/signature-pad";
 import SignatureCanvas from "react-signature-canvas";
-import { Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, WidthType } from "docx";
+import { Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, WidthType, BorderStyle } from "docx";
 import { saveAs } from "file-saver";
 import { Textarea } from "./ui/textarea";
 
@@ -68,9 +68,9 @@ export function LogSheetForm() {
       width: { size: 100, type: WidthType.PERCENTAGE },
       rows: [
         new TableRow({
-          children: ["Date", "Time In", "Time Out", "Total Hours", "Role / Tasks", "Remarks", "Signature"].map(text => new TableCell({ children: [new Paragraph({ text, bold: true })] })),
+          children: ["Date", "Time In", "Time Out", "Total Hours", "Role / Tasks", "Remarks"].map(text => new TableCell({ children: [new Paragraph({ text, bold: true })] })),
         }),
-        ...rows.flatMap(row => [
+        ...rows.map(row => 
           new TableRow({
             children: [
               new TableCell({ children: [new Paragraph(row.date)] }),
@@ -79,10 +79,9 @@ export function LogSheetForm() {
               new TableCell({ children: [new Paragraph(row.totalHours)] }),
               new TableCell({ children: [new Paragraph(row.tasks)] }),
               new TableCell({ children: [new Paragraph(row.remarks)] }),
-              new TableCell({ children: [] }), // Signature cell - maybe add image later if needed
             ],
           })
-        ])
+        )
       ]
     });
 
@@ -91,9 +90,14 @@ export function LogSheetForm() {
         children: [
           new Paragraph({ text: "EMPLOYEE DAILY / WEEKLY LOG SHEET", heading: "Title", alignment: "center" }),
           new Paragraph({ text: "" }),
-          new Paragraph({ children: [new TextRun({ text: `Month/Year: ${formData.monthYear}\t\tProject/Site: ${formData.projectSite}` })] }),
-          new Paragraph({ children: [new TextRun({ text: `Employee Name: ${formData.employeeName}\tEmployee ID: ${formData.employeeId}` })] }),
-          new Paragraph({ children: [new TextRun({ text: `Role: ${formData.role}\t\t\tDepartment: ${formData.department}` })] }),
+          new Table({
+            width: { size: 100, type: WidthType.PERCENTAGE },
+            rows: [
+                new TableRow({ children: [new TableCell({ children: [new Paragraph("Month/Year:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.monthYear)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph("Project/Site:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.projectSite)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } })] }),
+                new TableRow({ children: [new TableCell({ children: [new Paragraph("Employee Name:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.employeeName)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph("Employee ID:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.employeeId)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } })] }),
+                new TableRow({ children: [new TableCell({ children: [new Paragraph("Role:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.role)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph("Department:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.department)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } })] }),
+            ]
+          }),
           new Paragraph({ text: "" }),
           table,
           new Paragraph({ text: "" }),
@@ -202,3 +206,5 @@ export function LogSheetForm() {
     </Card>
   );
 }
+
+    

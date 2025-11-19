@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { SignaturePad } from "@/components/signature-pad";
 import SignatureCanvas from "react-signature-canvas";
-import { Document, Packer, Paragraph, TextRun, ImageRun } from "docx";
+import { Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, WidthType, BorderStyle } from "docx";
 import { saveAs } from "file-saver";
 import { Textarea } from "./ui/textarea";
 
@@ -66,20 +66,30 @@ export function LeaveApplicationForm() {
         children: [
           new Paragraph({ text: "LEAVE APPLICATION FORM", heading: "Title", alignment: "center" }),
           new Paragraph({ text: "" }),
-          new Paragraph({ children: [new TextRun({ text: `Application Date: ${formData.applicationDate}\t\tEmployee ID: ${formData.employeeId}` })] }),
-          new Paragraph({ children: [new TextRun({ text: `Employee Name: ${formData.employeeName}\t\tDepartment: ${formData.department}` })] }),
-          new Paragraph({ text: "__________________________________________________________________________________" }),
+          new Table({
+            width: { size: 100, type: WidthType.PERCENTAGE },
+            rows: [
+              new TableRow({ children: [new TableCell({ children: [new Paragraph("Application Date:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.applicationDate)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph("Employee ID:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.employeeId)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } })] }),
+              new TableRow({ children: [new TableCell({ children: [new Paragraph("Employee Name:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.employeeName)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph("Department:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.department)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } })] }),
+            ]
+          }),
+          new Paragraph({ text: "" }),
           new Paragraph({ text: "Type of Leave Requested:", bold: true }),
           new Paragraph({ text: `[${formData.leaveType === 'annual' ? 'X' : ' '}] Annual Leave\t\t[${formData.leaveType === 'sick' ? 'X' : ' '}] Sick Leave\t\t[${formData.leaveType === 'family' ? 'X' : ' '}] Family Responsibility` }),
           new Paragraph({ text: `[${formData.leaveType === 'maternity' ? 'X' : ' '}] Maternity/Paternity\t[${formData.leaveType === 'study' ? 'X' : ' '}] Study\t\t[${formData.leaveType === 'unpaid' ? 'X' : ' '}] Unpaid` }),
           new Paragraph({ children: [new TextRun({ text: `[${formData.leaveType === 'other' ? 'X' : ' '}] Other: ${formData.otherLeaveType}`})] }),
           new Paragraph({ text: "" }),
           new Paragraph({ text: "Leave Period:", bold: true }),
-          new Paragraph({ children: [new TextRun({ text: `From: ${formData.leaveFrom}\tTo: ${formData.leaveTo}\tNumber of working days: ${formData.workingDays}` })] }),
+           new Table({
+            width: { size: 100, type: WidthType.PERCENTAGE },
+            rows: [
+              new TableRow({ children: [new TableCell({ children: [new Paragraph("From:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.leaveFrom)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph("To:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.leaveTo)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph("Number of working days:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.workingDays)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } })] }),
+            ]
+          }),
           new Paragraph({ text: "" }),
           new Paragraph({ text: "Reason for Leave (detailed):", bold: true }),
           ...formData.reason.split('\n').map(p => new Paragraph({ text: p })),
-          new Paragraph({ text: "__________________________________________________________________________________" }),
+          new Paragraph({ text: "" }),
           new Paragraph({ text: "Employee Declaration:", bold: true }),
           new Paragraph({ text: "I confirm the information above is correct." }),
           new Paragraph({ children: [new TextRun({ text: "Signature:", bold: true })] }),
@@ -204,3 +214,5 @@ export function LeaveApplicationForm() {
     </Card>
   );
 }
+
+    

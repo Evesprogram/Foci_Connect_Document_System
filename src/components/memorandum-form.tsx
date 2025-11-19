@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { SignaturePad } from "@/components/signature-pad";
 import SignatureCanvas from "react-signature-canvas";
-import { Document, Packer, Paragraph, TextRun, ImageRun } from "docx";
+import { Document, Packer, Paragraph, TextRun, ImageRun, Table, TableCell, TableRow, WidthType, BorderStyle } from "docx";
 import { saveAs } from "file-saver";
 
 const MemoInputRow = ({ label, id, value, onChange }: { label: string; id: string; value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; }) => (
@@ -43,7 +43,6 @@ export function MemorandumForm() {
       return;
     }
     const sigImage = sigPadRef.current?.getTrimmedCanvas().toDataURL("image/png");
-    // The docx library expects the base64 string without the data URI prefix.
     const base64Image = sigImage!.split(",")[1];
 
     const doc = new Document({
@@ -52,24 +51,23 @@ export function MemorandumForm() {
           children: [
             new Paragraph({ text: "MEMORANDUM", heading: "Title", alignment: "center" }),
             new Paragraph({ text: "" }),
-            new Paragraph({
-              children: [new TextRun({ text: "To:\t", bold: true }), new TextRun(formData.to)],
+            new Table({
+                width: { size: 100, type: WidthType.PERCENTAGE },
+                rows: [
+                    new TableRow({ children: [new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "To:", bold: true })] })], width: { size: 15, type: WidthType.PERCENTAGE }, borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.to)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } })] }),
+                    new TableRow({ children: [new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "From:", bold: true })] })], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.from)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } })] }),
+                    new TableRow({ children: [new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Date:", bold: true })] })], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.date)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } })] }),
+                    new TableRow({ children: [new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Subject:", bold: true })] })], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.subject)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } })] }),
+                ]
             }),
-            new Paragraph({
-              children: [new TextRun({ text: "From:\t", bold: true }), new TextRun(formData.from)],
-            }),
-            new Paragraph({
-              children: [new TextRun({ text: "Date:\t", bold: true }), new TextRun(formData.date)],
-            }),
-            new Paragraph({
-              children: [new TextRun({ text: "Subject:\t", bold: true }), new TextRun(formData.subject)],
-            }),
-            new Paragraph({ text: "__________________________________________________________________________________" }),
             new Paragraph({ text: "" }),
             ...formData.body.split('\n').map(p => new Paragraph({ text: p })),
             new Paragraph({ text: "" }),
-            new Paragraph({
-              children: [new TextRun({ text: "Action Required:\t", bold: true }), new TextRun(formData.actionRequired)],
+             new Table({
+                width: { size: 100, type: WidthType.PERCENTAGE },
+                rows: [
+                    new TableRow({ children: [new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Action Required:", bold: true })] })], width: { size: 25, type: WidthType.PERCENTAGE }, borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.actionRequired)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } })] }),
+                ]
             }),
             new Paragraph({ text: "" }),
             new Paragraph({
@@ -145,3 +143,5 @@ export function MemorandumForm() {
     </Card>
   );
 }
+
+    

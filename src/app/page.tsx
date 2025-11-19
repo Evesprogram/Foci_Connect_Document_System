@@ -1,13 +1,13 @@
 import { PageHeader } from '@/components/page-header';
-import { LeaveApplicationForm } from '@/components/leave-application-form';
+import { LogSheetForm } from '@/components/log-sheet-form';
 
 export default function Home() {
   return (
     <div className="flex min-h-screen w-full flex-col">
       <PageHeader />
       <main className="flex-1 container mx-auto px-4 py-10 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto space-y-12">
-          <LeaveApplicationForm />
+        <div className="max-w-7xl mx-auto space-y-12">
+          <LogSheetForm />
         </div>
       </main>
       <footer className="py-6 border-t bg-card">

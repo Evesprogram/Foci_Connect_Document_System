@@ -8,9 +8,10 @@ import { LeaveApplicationForm } from '@/components/leave-application-form';
 import { LogSheetForm } from '@/components/log-sheet-form';
 import { ProjectReportForm } from '@/components/project-report-form';
 import { Button } from '@/components/ui/button';
-import { Sheet, Menu } from 'lucide-react';
+import { HomeIcon, Sheet } from 'lucide-react';
+import { HomePage } from '@/components/home-page';
 
-type DocumentType = 'memorandum' | 'leave' | 'log' | 'report';
+type DocumentType = 'home' | 'leave' | 'log' | 'report' | 'memorandum';
 
 const NavButton = ({ active, onClick, children }: { active: boolean, onClick: () => void, children: React.ReactNode }) => (
   <Button
@@ -23,20 +24,22 @@ const NavButton = ({ active, onClick, children }: { active: boolean, onClick: ()
 );
 
 export default function Home() {
-  const [activeDocument, setActiveDocument] = useState<DocumentType>('memorandum');
+  const [activeDocument, setActiveDocument] = useState<DocumentType>('home');
 
   const renderActiveDocument = () => {
     switch (activeDocument) {
-      case 'memorandum':
-        return <MemorandumForm />;
+      case 'home':
+        return <HomePage />;
       case 'leave':
         return <LeaveApplicationForm />;
       case 'log':
         return <LogSheetForm />;
       case 'report':
         return <ProjectReportForm />;
-      default:
+      case 'memorandum':
         return <MemorandumForm />;
+      default:
+        return <HomePage />;
     }
   };
 
@@ -44,11 +47,12 @@ export default function Home() {
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
       <aside className="fixed inset-y-0 left-0 z-10 hidden w-60 flex-col border-r bg-background sm:flex">
         <nav className="flex flex-col gap-4 p-4">
-          <h2 className="text-lg font-semibold tracking-tight">Documents</h2>
-          <NavButton active={activeDocument === 'memorandum'} onClick={() => setActiveDocument('memorandum')}>
-            <Sheet className="mr-2 h-4 w-4" />
-            Memorandum
+          <h2 className="text-lg font-semibold tracking-tight">FOCI Connect</h2>
+          <NavButton active={activeDocument === 'home'} onClick={() => setActiveDocument('home')}>
+            <HomeIcon className="mr-2 h-4 w-4" />
+            Home
           </NavButton>
+          <h3 className="px-2 text-xs font-semibold uppercase text-muted-foreground tracking-wider">Documents</h3>
           <NavButton active={activeDocument === 'leave'} onClick={() => setActiveDocument('leave')}>
              <Sheet className="mr-2 h-4 w-4" />
             Leave Application
@@ -60,6 +64,10 @@ export default function Home() {
           <NavButton active={activeDocument === 'report'} onClick={() => setActiveDocument('report')}>
             <Sheet className="mr-2 h-4 w-4" />
             Project Report
+          </NavButton>
+          <NavButton active={activeDocument === 'memorandum'} onClick={() => setActiveDocument('memorandum')}>
+            <Sheet className="mr-2 h-4 w-4" />
+            Memorandum
           </NavButton>
         </nav>
       </aside>

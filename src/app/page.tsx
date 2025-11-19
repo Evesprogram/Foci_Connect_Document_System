@@ -1,5 +1,5 @@
 import { PageHeader } from '@/components/page-header';
-import { LogSheetForm } from '@/components/log-sheet-form';
+import { MonthlyProjectReportForm } from '@/components/monthly-project-report-form';
 
 export default function Home() {
   return (
@@ -7,7 +7,7 @@ export default function Home() {
       <PageHeader />
       <main className="flex-1 container mx-auto px-4 py-10 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto space-y-12">
-          <LogSheetForm />
+          <MonthlyProjectReportForm />
         </div>
       </main>
       <footer className="py-6 border-t bg-card">

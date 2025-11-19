@@ -125,12 +125,12 @@ export function LeaveApplicationForm() {
             <div className="flex items-center space-x-2"><RadioGroupItem value="maternity" id="maternity" /><Label htmlFor="maternity">Maternity/Paternity</Label></div>
             <div className="flex items-center space-x-2"><RadioGroupItem value="study" id="study" /><Label htmlFor="study">Study</Label></div>
             <div className="flex items-center space-x-2"><RadioGroupItem value="unpaid" id="unpaid" /><Label htmlFor="unpaid">Unpaid</Label></div>
+            <div className="flex items-center col-span-2 md:col-span-3 gap-2">
+              <RadioGroupItem value="other" id="other" />
+              <Label htmlFor="other" className="whitespace-nowrap">Other:</Label>
+              <Input name="otherLeaveType" value={formData.otherLeaveType} onChange={handleInputChange} disabled={formData.leaveType !== 'other'} />
+            </div>
           </RadioGroup>
-           <div className="flex items-center gap-2">
-             <RadioGroupItem value="other" id="other" checked={formData.leaveType === 'other'} onClick={() => handleLeaveTypeChange('other')}/>
-            <Label htmlFor="other" className="whitespace-nowrap">Other:</Label>
-            <Input name="otherLeaveType" value={formData.otherLeaveType} onChange={handleInputChange} disabled={formData.leaveType !== 'other'} />
-          </div>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b pb-6">
@@ -181,8 +181,7 @@ export function LeaveApplicationForm() {
               <div className="flex flex-wrap items-end gap-6">
                 <SignaturePad sigPadRef={hrSigRef} title="HR / Director Signature" />
                  <div className="grid w-full max-w-xs items-center gap-1.5">
-                    <Label htmlFor="hrSignatureDate">Date</Label>
-                    <Input id="hrSignatureDate" name="hrSignatureDate" type="date" value={formData.hrSignatureDate} onChange={handleInputChange} />
+                    <Label htmlFor="hrSignatureDate">Date</Label>                    <Input id="hrSignatureDate" name="hrSignatureDate" type="date" value={formData.hrSignatureDate} onChange={handleInputChange} />
                 </div>
               </div>
           </div>

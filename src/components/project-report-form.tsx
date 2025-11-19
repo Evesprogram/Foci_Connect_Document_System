@@ -89,12 +89,12 @@ export function ProjectReportForm() {
           new Paragraph({ text: "" }),
           new Paragraph({ children: [new TextRun({ text: `Prepared By: ${formData.preparedBy}\t` })] }),
           new Paragraph({ children: [new TextRun({ text: "Signature:", bold: true })] }),
-          new Paragraph({ children: [new ImageRun({ data: Buffer.from(preparedBySig, 'base64'), transformation: { width: 150, height: 75 } })] }),
+          new Paragraph({ children: [new ImageRun({ data: preparedBySig, transformation: { width: 150, height: 75 } })] }),
           new Paragraph({ children: [new TextRun({ text: `Date: ${formData.preparedByDate}` })] }),
           new Paragraph({ text: "" }),
           new Paragraph({ children: [new TextRun({ text: `Reviewed By: ${formData.reviewedBy}\t` })] }),
           new Paragraph({ children: [new TextRun({ text: "Signature:", bold: true })] }),
-          ...(reviewedBySig ? [new Paragraph({ children: [new ImageRun({ data: Buffer.from(reviewedBySig, 'base64'), transformation: { width: 150, height: 75 } })] })] : []),
+          ...(reviewedBySig ? [new Paragraph({ children: [new ImageRun({ data: reviewedBySig, transformation: { width: 150, height: 75 } })] })] : []),
           new Paragraph({ children: [new TextRun({ text: `Date: ${formData.reviewedByDate}` })] }),
         ]
       }]

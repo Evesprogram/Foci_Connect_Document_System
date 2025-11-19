@@ -43,6 +43,7 @@ export function MemorandumForm() {
       return;
     }
     const sigImage = sigPadRef.current?.getTrimmedCanvas().toDataURL("image/png");
+    // The docx library expects the base64 string without the data URI prefix.
     const base64Image = sigImage!.split(",")[1];
 
     const doc = new Document({
@@ -79,7 +80,7 @@ export function MemorandumForm() {
             new Paragraph({
                 children: [
                     new ImageRun({
-                        data: Buffer.from(base64Image, 'base64'),
+                        data: base64Image,
                         transformation: {
                             width: 200,
                             height: 100,

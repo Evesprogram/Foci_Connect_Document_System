@@ -39,7 +39,7 @@ export function MemorandumForm() {
 
   const handleExport = async () => {
     if (sigPadRef.current?.isEmpty()) {
-      alert("Please provide a signature.");
+      alert("Please provide a signature before exporting.");
       return;
     }
     const sigImage = sigPadRef.current?.getTrimmedCanvas().toDataURL("image/png");

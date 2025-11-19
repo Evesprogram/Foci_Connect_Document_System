@@ -49,8 +49,20 @@ export function LogSheetForm() {
   };
 
   const handleExport = async () => {
-    const employeeSignature = employeeSigRef.current?.getTrimmedCanvas().toDataURL("image/png").split(",")[1];
-    const supervisorSignature = supervisorSigRef.current?.getTrimmedCanvas().toDataURL("image/png").split(",")[1];
+    const getSignatureImage = (ref: React.RefObject<SignatureCanvas>) => {
+      if (ref.current && !ref.current.isEmpty()) {
+        return ref.current.getTrimmedCanvas().toDataURL("image/png").split(",")[1];
+      }
+      return null;
+    };
+    
+    const employeeSignature = getSignatureImage(employeeSigRef);
+    const supervisorSignature = getSignatureImage(supervisorSigRef);
+
+    if (!employeeSignature) {
+      alert("Please provide the employee's signature.");
+      return;
+    }
 
     const table = new Table({
       width: { size: 100, type: WidthType.PERCENTAGE },
@@ -89,7 +101,7 @@ export function LogSheetForm() {
           new Paragraph({ text: "" }),
           new Paragraph({ text: "Employee Declaration: I confirm the above information is correct.", bold: true }),
           new Paragraph({ children: [new TextRun({ text: "Signature:", bold: true })] }),
-          ...(employeeSignature ? [new Paragraph({ children: [new ImageRun({ data: Buffer.from(employeeSignature, 'base64'), transformation: { width: 150, height: 75 } })] })] : []),
+          new Paragraph({ children: [new ImageRun({ data: Buffer.from(employeeSignature, 'base64'), transformation: { width: 150, height: 75 } })] }),
           new Paragraph({ children: [new TextRun({ text: `Date: ${formData.employeeDeclarationDate}` })] }),
           new Paragraph({ text: "" }),
           new Paragraph({ text: "Supervisor / Manager Verification:", bold: true }),

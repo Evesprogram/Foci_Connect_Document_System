@@ -45,9 +45,21 @@ export function LeaveApplicationForm() {
   };
 
   const handleExport = async () => {
-    const employeeSignature = employeeSigRef.current?.getTrimmedCanvas().toDataURL("image/png").split(",")[1];
-    const supervisorSignature = supervisorSigRef.current?.getTrimmedCanvas().toDataURL("image/png").split(",")[1];
-    const hrSignature = hrSigRef.current?.getTrimmedCanvas().toDataURL("image/png").split(",")[1];
+    const getSignatureImage = (ref: React.RefObject<SignatureCanvas>) => {
+      if (ref.current && !ref.current.isEmpty()) {
+        return ref.current.getTrimmedCanvas().toDataURL("image/png").split(",")[1];
+      }
+      return null;
+    };
+
+    const employeeSignature = getSignatureImage(employeeSigRef);
+    const supervisorSignature = getSignatureImage(supervisorSigRef);
+    const hrSignature = getSignatureImage(hrSigRef);
+
+    if (!employeeSignature) {
+      alert("Please provide the employee's signature.");
+      return;
+    }
 
     const doc = new Document({
       sections: [{
@@ -71,7 +83,7 @@ export function LeaveApplicationForm() {
           new Paragraph({ text: "Employee Declaration:", bold: true }),
           new Paragraph({ text: "I confirm the information above is correct." }),
           new Paragraph({ children: [new TextRun({ text: "Signature:", bold: true })] }),
-          ...(employeeSignature ? [new Paragraph({ children: [new ImageRun({ data: Buffer.from(employeeSignature, 'base64'), transformation: { width: 150, height: 75 } })] })] : []),
+          new Paragraph({ children: [new ImageRun({ data: Buffer.from(employeeSignature, 'base64'), transformation: { width: 150, height: 75 } })] }),
           new Paragraph({ children: [new TextRun({ text: `Date: ${formData.employeeSignatureDate}` })] }),
           new Paragraph({ text: "" }),
           new Paragraph({ text: "Supervisor/Manager Recommendation:", bold: true }),

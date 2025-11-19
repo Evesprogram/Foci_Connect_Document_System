@@ -46,8 +46,20 @@ export function ProjectReportForm() {
   };
 
   const handleExport = async () => {
-    const preparedBySig = preparedBySigRef.current?.getTrimmedCanvas().toDataURL("image/png").split(",")[1];
-    const reviewedBySig = reviewedBySigRef.current?.getTrimmedCanvas().toDataURL("image/png").split(",")[1];
+    const getSignatureImage = (ref: React.RefObject<SignatureCanvas>) => {
+      if (ref.current && !ref.current.isEmpty()) {
+        return ref.current.getTrimmedCanvas().toDataURL("image/png").split(",")[1];
+      }
+      return null;
+    };
+
+    const preparedBySig = getSignatureImage(preparedBySigRef);
+    const reviewedBySig = getSignatureImage(reviewedBySigRef);
+
+    if (!preparedBySig) {
+      alert("Please ensure the 'Prepared By' signature is provided.");
+      return;
+    }
 
     const doc = new Document({
       sections: [{
@@ -77,7 +89,7 @@ export function ProjectReportForm() {
           new Paragraph({ text: "" }),
           new Paragraph({ children: [new TextRun({ text: `Prepared By: ${formData.preparedBy}\t` })] }),
           new Paragraph({ children: [new TextRun({ text: "Signature:", bold: true })] }),
-          ...(preparedBySig ? [new Paragraph({ children: [new ImageRun({ data: Buffer.from(preparedBySig, 'base64'), transformation: { width: 150, height: 75 } })] })] : []),
+          new Paragraph({ children: [new ImageRun({ data: Buffer.from(preparedBySig, 'base64'), transformation: { width: 150, height: 75 } })] }),
           new Paragraph({ children: [new TextRun({ text: `Date: ${formData.preparedByDate}` })] }),
           new Paragraph({ text: "" }),
           new Paragraph({ children: [new TextRun({ text: `Reviewed By: ${formData.reviewedBy}\t` })] }),

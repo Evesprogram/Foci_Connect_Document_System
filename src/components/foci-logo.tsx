@@ -8,18 +8,28 @@ export const FociLogo = (props: React.SVGProps<SVGSVGElement>) => (
     height="40"
     {...props}
   >
-    <style>
-      {
-        '.logo-text { font-family: "Space Grotesk", sans-serif; font-size: 24px; font-weight: 700; fill: hsl(var(--primary)); }'
-      }
-      {
-        '.logo-subtext { font-family: "Inter", sans-serif; font-size: 8px; fill: hsl(var(--foreground)); letter-spacing: 0.5px; }'
-      }
-    </style>
-    <text x="0" y="20" className="logo-text">
+    <text
+      x="0"
+      y="20"
+      style={{
+        fontFamily: '"Space Grotesk", sans-serif',
+        fontSize: '24px',
+        fontWeight: 700,
+        fill: 'hsl(var(--primary))',
+      }}
+    >
       FOCI GROUP
     </text>
-    <text x="0" y="32" className="logo-subtext">
+    <text
+      x="0"
+      y="32"
+      style={{
+        fontFamily: '"Inter", sans-serif',
+        fontSize: '8px',
+        fill: 'hsl(var(--foreground))',
+        letterSpacing: '0.5px',
+      }}
+    >
       Engineering | ICT | Smart Automation
     </text>
   </svg>

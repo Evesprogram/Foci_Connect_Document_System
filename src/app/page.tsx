@@ -9,13 +9,14 @@ import { LogSheetForm } from '@/components/log-sheet-form';
 import { ProjectReportForm } from '@/components/project-report-form';
 import { SiteIncidentReportForm } from '@/components/site-incident-report-form';
 import { Button } from '@/components/ui/button';
-import { HomeIcon, Sheet, FileText, FilePlus, Briefcase } from 'lucide-react';
+import { HomeIcon, Sheet, FileText, FilePlus, Briefcase, Megaphone } from 'lucide-react';
 import { HomePage } from '@/components/home-page';
 import { TaxInvoiceForm } from '@/components/tax-invoice-form';
 import { PurchaseOrderForm } from '@/components/purchase-order-form';
 import { AcceptanceLetterForm } from '@/components/acceptance-letter-form';
+import { NoticeLetterForm } from '@/components/notice-letter-form';
 
-type DocumentType = 'home' | 'leave' | 'log' | 'report' | 'memorandum' | 'incident' | 'invoice' | 'po' | 'acceptance';
+type DocumentType = 'home' | 'leave' | 'log' | 'report' | 'memorandum' | 'incident' | 'invoice' | 'po' | 'acceptance' | 'notice';
 
 const NavButton = ({ active, onClick, children }: { active: boolean, onClick: () => void, children: React.ReactNode }) => (
   <Button
@@ -50,6 +51,8 @@ export default function Home() {
         return <PurchaseOrderForm />;
       case 'acceptance':
         return <AcceptanceLetterForm />;
+      case 'notice':
+        return <NoticeLetterForm />;
       default:
         return <HomePage />;
     }
@@ -76,6 +79,10 @@ export default function Home() {
           <NavButton active={activeDocument === 'acceptance'} onClick={() => setActiveDocument('acceptance')}>
             <FilePlus className="mr-2 h-4 w-4" />
             Acceptance Letter
+          </NavButton>
+          <NavButton active={activeDocument === 'notice'} onClick={() => setActiveDocument('notice')}>
+            <Megaphone className="mr-2 h-4 w-4" />
+            Notice Letter
           </NavButton>
           <NavButton active={activeDocument === 'leave'} onClick={() => setActiveDocument('leave')}>
              <Sheet className="mr-2 h-4 w-4" />

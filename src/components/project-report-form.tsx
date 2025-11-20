@@ -1,30 +1,25 @@
 
 "use client";
 
-import { useRef, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { useEffect, useRef, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { SignaturePad } from "@/components/signature-pad";
 import SignatureCanvas from "react-signature-canvas";
-import { Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, WidthType, BorderStyle, HeadingLevel } from "docx";
+import { Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, WidthType, BorderStyle, HeadingLevel, AlignmentType } from "docx";
 import { saveAs } from "file-saver";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Share2 } from "lucide-react";
 
-
-const Section = ({ title, name, value, onChange }: { title: string; name: string; value: string; onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void; }) => (
-    <div className="space-y-2">
-        <h3 className="text-lg font-semibold">{title}</h3>
-        <Textarea name={name} value={value} onChange={onChange} rows={5} />
-    </div>
-);
-
-const base64ToArrayBuffer = (base64: string) => {
-  const binary_string = window.atob(base64);
+const base64ToArrayBuffer = (base64: string): ArrayBuffer => {
+  if (!base64 || base64.indexOf(',') === -1) {
+    throw new Error('Invalid base64 string');
+  }
+  const binary_string = window.atob(base64.split(",")[1]);
   const len = binary_string.length;
   const bytes = new Uint8Array(len);
   for (let i = 0; i < len; i++) {
@@ -35,27 +30,40 @@ const base64ToArrayBuffer = (base64: string) => {
 
 export function ProjectReportForm() {
   const [formData, setFormData] = useState({
-    reportTitle: "",
+    month: new Date().toLocaleString('default', { month: 'long' }),
+    year: new Date().getFullYear().toString(),
+    reportNo: "",
+    projectName: "",
     preparedBy: "",
-    department: "",
-    periodFrom: "",
-    periodTo: "",
-    dateSubmitted: "",
-    executiveSummary: "",
-    achievements: "",
-    challenges: "",
-    financialSummary: "",
-    plannedActivities: "",
-    preparedByDate: "",
-    reviewedBy: "",
-    reviewedByDate: "",
+    revenue: "0",
+    expenses: "0",
+    profitLoss: "0",
+    progress: "0",
+    milestones: "",
+    staffCount: "0",
+    leaveDays: "0",
+    approvedBy: "",
+    approvedByDate: "",
   });
 
   const [powerAutomateUrl, setPowerAutomateUrl] = useState("");
   const { toast } = useToast();
 
-  const preparedBySigRef = useRef<SignatureCanvas>(null);
-  const reviewedBySigRef = useRef<SignatureCanvas>(null);
+  const approvedBySigRef = useRef<SignatureCanvas>(null);
+
+  useEffect(() => {
+    const year = new Date().getFullYear();
+    const month = (new Date().getMonth() + 1).toString().padStart(2, '0');
+    const uniqueNum = Math.floor(1000 + Math.random() * 9000);
+    setFormData(prev => ({...prev, reportNo: `MER-${year}${month}-${uniqueNum}`}));
+  }, []);
+  
+  useEffect(() => {
+      const revenue = parseFloat(formData.revenue) || 0;
+      const expenses = parseFloat(formData.expenses) || 0;
+      const profit = revenue - expenses;
+      setFormData(prev => ({...prev, profitLoss: profit.toFixed(2) }))
+  }, [formData.revenue, formData.expenses])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -63,7 +71,6 @@ export function ProjectReportForm() {
   };
   
   const handleShare = () => {
-    // In a real implementation, you would post the document data to this URL.
     console.log("Sending to Power Automate URL:", powerAutomateUrl);
     toast({
       title: "Sent to Workflow",
@@ -72,139 +79,158 @@ export function ProjectReportForm() {
   };
 
   const handleExport = async () => {
-    const getSignatureImage = (ref: React.RefObject<SignatureCanvas>) => {
-      if (ref.current && !ref.current.isEmpty()) {
-        const dataUrl = ref.current.getTrimmedCanvas().toDataURL("image/png");
-        return dataUrl.split(",")[1];
-      }
-      return null;
-    };
-
-    const preparedBySigBase64 = getSignatureImage(preparedBySigRef);
-    const reviewedBySigBase64 = getSignatureImage(reviewedBySigRef);
-
-    if (!preparedBySigBase64) {
-      alert("Please ensure the 'Prepared By' signature is provided.");
-      return;
+    const approvedBySigBase64 = approvedBySigRef.current?.getTrimmedCanvas().toDataURL("image/png");
+    
+    if (!approvedBySigBase64 || approvedBySigRef.current?.isEmpty()) {
+        alert("Please provide the approver's signature.");
+        return;
     }
     
-    const preparedBySig = base64ToArrayBuffer(preparedBySigBase64);
-    const reviewedBySig = reviewedBySigBase64 ? base64ToArrayBuffer(reviewedBySigBase64) : null;
-
-    const createSection = (title: string, content: string) => [
-        new Paragraph({ text: title, bold: true, spacing: { before: 200 } }),
-        ...content.split('\n').map(p => new Paragraph({ text: p })),
-    ];
-    
-    const signatureTable = new Table({
-        width: { size: 100, type: WidthType.PERCENTAGE },
-        borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE }, insideHorizontal: { style: BorderStyle.NONE }, insideVertical: { style: BorderStyle.NONE } },
-        rows: [
-            new TableRow({ 
-                children: [
-                    new TableCell({ 
-                        children: [
-                            new Paragraph("Prepared By:"), 
-                            new Paragraph(formData.preparedBy), 
-                            new Paragraph({ text: "" }), 
-                            new Paragraph({ children: [new ImageRun({ data: preparedBySig, transformation: { width: 150, height: 75 } })] }), 
-                            new Paragraph(`Date: ${formData.preparedByDate}`)
-                        ] 
-                    }), 
-                    new TableCell({ 
-                        children: [
-                            new Paragraph("Reviewed By:"), 
-                            new Paragraph(formData.reviewedBy), 
-                            new Paragraph({ text: "" }), 
-                            ...(reviewedBySig ? [new Paragraph({ children: [new ImageRun({ data: reviewedBySig, transformation: { width: 150, height: 75 } })] })] : [new Paragraph("") ]), 
-                            new Paragraph(`Date: ${formData.reviewedByDate}`)
-                        ]
-                    })
-                ] 
-            }),
-        ]
-    });
-
+    const approvedBySigBuffer = base64ToArrayBuffer(approvedBySigBase64);
 
     const doc = new Document({
       sections: [{
         children: [
-          new Paragraph({ text: "MONTHLY / PROJECT REPORT", heading: HeadingLevel.TITLE, alignment: "center" }),
-          new Paragraph({ text: "" }),
+          new Paragraph({ text: "FOCI GROUP (Pty) Ltd", bold: true, alignment: AlignmentType.CENTER }),
+          new Paragraph({ text: `MONTH-END REPORT – ${formData.month.toUpperCase()} ${formData.year}`, heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER }),
+          new Paragraph(""),
+
           new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
             rows: [
-                new TableRow({ children: [new TableCell({ children: [new Paragraph("Report Title:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.reportTitle)], columnSpan: 3, borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } })] }),
-                new TableRow({ children: [new TableCell({ children: [new Paragraph("Prepared By:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.preparedBy)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph("Department:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.department)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } })] }),
-                new TableRow({ children: [new TableCell({ children: [new Paragraph("Report Period:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(`From ${formData.periodFrom} To ${formData.periodTo}`)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph("Date Submitted:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.dateSubmitted)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } })] }),
-            ]
+              new TableRow({
+                children: [
+                  new TableCell({ children: [new Paragraph(`Report No: ${formData.reportNo}`)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }),
+                  new TableCell({ children: [new Paragraph(`Period: ${formData.month} ${formData.year}`)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }),
+                ],
+              }),
+              new TableRow({
+                children: [
+                  new TableCell({ children: [new Paragraph(`Project/Site: ${formData.projectName}`)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }),
+                  new TableCell({ children: [new Paragraph(`Prepared by: ${formData.preparedBy}`)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }),
+                ],
+              }),
+            ],
           }),
-          new Paragraph({ text: "" }),
-          ...createSection("1. Executive Summary", formData.executiveSummary),
-          ...createSection("2. Key Achievements & Milestones", formData.achievements),
-          ...createSection("3. Challenges Encountered & Resolutions", formData.challenges),
-          ...createSection("4. Financial / Resource Summary (if applicable)", formData.financialSummary),
-          ...createSection("5. Planned Activities for Next Period", formData.plannedActivities),
+          new Paragraph(""),
+
+          new Paragraph({ text: "1. Financial Summary", bold: true, spacing: { before: 200 } }),
+          new Table({
+              width: { size: 80, type: WidthType.PERCENTAGE },
+              rows: [
+                  new TableRow({ children: [new TableCell({ children: [new Paragraph("Revenue this month:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(`R ${formData.revenue}`)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } })] }),
+                  new TableRow({ children: [new TableCell({ children: [new Paragraph("Expenses this month:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(`R ${formData.expenses}`)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } })] }),
+                  new TableRow({ children: [new TableCell({ children: [new Paragraph("Profit/Loss:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(`R ${formData.profitLoss}`)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } })] }),
+              ]
+          }),
+
+          new Paragraph({ text: "2. Project Progress", bold: true, spacing: { before: 200 } }),
+           new Table({
+              width: { size: 80, type: WidthType.PERCENTAGE },
+              rows: [
+                  new TableRow({ children: [new TableCell({ children: [new Paragraph("% Complete:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(`${formData.progress}%`)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } })] }),
+                  new TableRow({ children: [new TableCell({ children: [new Paragraph("Milestones achieved:")], verticalAlign: "top", borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: formData.milestones.split("\n").map(p => new Paragraph(p)), borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } })] }),
+              ]
+          }),
+          
+          new Paragraph({ text: "3. HR Summary", bold: true, spacing: { before: 200 } }),
+          new Table({
+              width: { size: 80, type: WidthType.PERCENTAGE },
+              rows: [
+                  new TableRow({ children: [new TableCell({ children: [new Paragraph("Total staff on site:")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.staffCount)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } })] }),
+                  new TableRow({ children: [new TableCell({ children: [new Paragraph("Leave taken (days):")], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }), new TableCell({ children: [new Paragraph(formData.leaveDays)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } })] }),
+              ]
+          }),
+
           new Paragraph({ text: "", spacing: { before: 400 } }),
-          signatureTable
+          new Table({
+            width: { size: 100, type: WidthType.PERCENTAGE },
+            rows: [
+                new TableRow({
+                    children: [
+                        new TableCell({ children: [new Paragraph(`Approved by: ${formData.approvedBy}`)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }),
+                        new TableCell({ children: [ new Paragraph({ children: [ new ImageRun({ data: approvedBySigBuffer, transformation: { width: 150, height: 40 } }) ] }) ], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }),
+                        new TableCell({ children: [new Paragraph(`Date: ${formData.approvedByDate}`)], borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } } }),
+                    ]
+                })
+            ]
+          })
         ]
       }]
     });
     
     const blob = await Packer.toBlob(doc);
-    saveAs(blob, "ProjectReport.docx");
+    saveAs(blob, "MonthEndReport.docx");
   };
 
   return (
     <Card className="w-full">
-      <CardHeader className="text-center">
-        <CardTitle className="font-headline text-2xl tracking-wider">MONTHLY / PROJECT REPORT</CardTitle>
+      <CardHeader>
+        <CardTitle className="font-headline text-2xl tracking-wider">MONTH-END REPORT</CardTitle>
+        <CardDescription>Generate a structured report for the month's activities.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-8">
         <div className="space-y-4 border-b pb-6">
-            <div className="space-y-2">
-                <Label htmlFor="reportTitle">Report Title</Label>
-                <Input id="reportTitle" name="reportTitle" value={formData.reportTitle} onChange={handleInputChange} />
-            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2"><Label htmlFor="preparedBy">Prepared By</Label><Input id="preparedBy" name="preparedBy" value={formData.preparedBy} onChange={handleInputChange} /></div>
-                <div className="space-y-2"><Label htmlFor="department">Department</Label><Input id="department" name="department" value={formData.department} onChange={handleInputChange} /></div>
+                <div className="space-y-2">
+                    <Label>Month</Label>
+                    <Input name="month" value={formData.month} onChange={handleInputChange} />
+                </div>
+                <div className="space-y-2">
+                    <Label>Year</Label>
+                    <Input name="year" type="number" value={formData.year} onChange={handleInputChange} />
+                </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="space-y-2"><Label htmlFor="periodFrom">Report Period: From</Label><Input id="periodFrom" name="periodFrom" type="date" value={formData.periodFrom} onChange={handleInputChange} /></div>
-                <div className="space-y-2"><Label htmlFor="periodTo">To</Label><Input id="periodTo" name="periodTo" type="date" value={formData.periodTo} onChange={handleInputChange} /></div>
-                <div className="space-y-2"><Label htmlFor="dateSubmitted">Date Submitted</Label><Input id="dateSubmitted" name="dateSubmitted" type="date" value={formData.dateSubmitted} onChange={handleInputChange} /></div>
+            <div className="space-y-2">
+                <Label>Report No</Label>
+                <Input name="reportNo" value={formData.reportNo} readOnly />
+            </div>
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2"><Label htmlFor="projectName">Project/Site</Label><Input id="projectName" name="projectName" value={formData.projectName} onChange={handleInputChange} /></div>
+                <div className="space-y-2"><Label htmlFor="preparedBy">Prepared By</Label><Input id="preparedBy" name="preparedBy" value={formData.preparedBy} onChange={handleInputChange} /></div>
             </div>
         </div>
 
-        <Section title="1. Executive Summary" name="executiveSummary" value={formData.executiveSummary} onChange={handleInputChange} />
-        <Section title="2. Key Achievements & Milestones" name="achievements" value={formData.achievements} onChange={handleInputChange} />
-        <Section title="3. Challenges Encountered & Resolutions" name="challenges" value={formData.challenges} onChange={handleInputChange} />
-        <Section title="4. Financial / Resource Summary (if applicable)" name="financialSummary" value={formData.financialSummary} onChange={handleInputChange} />
-        <Section title="5. Planned Activities for Next Period" name="plannedActivities" value={formData.plannedActivities} onChange={handleInputChange} />
+        <div className="space-y-4">
+            <h3 className="text-lg font-semibold">1. Financial Summary</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                 <div className="space-y-2"><Label htmlFor="revenue">Revenue this month</Label><Input id="revenue" name="revenue" type="number" value={formData.revenue} onChange={handleInputChange} /></div>
+                 <div className="space-y-2"><Label htmlFor="expenses">Expenses this month</Label><Input id="expenses" name="expenses" type="number" value={formData.expenses} onChange={handleInputChange} /></div>
+                 <div className="space-y-2"><Label htmlFor="profitLoss">Profit/Loss</Label><Input id="profitLoss" name="profitLoss" value={formData.profitLoss} readOnly className="font-medium" /></div>
+            </div>
+        </div>
+        
+        <div className="space-y-4">
+            <h3 className="text-lg font-semibold">2. Project Progress</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                 <div className="space-y-2"><Label htmlFor="progress">% Complete</Label><Input id="progress" name="progress" type="number" value={formData.progress} onChange={handleInputChange} /></div>
+                 <div className="space-y-2"><Label htmlFor="milestones">Milestones Achieved</Label><Textarea id="milestones" name="milestones" value={formData.milestones} onChange={handleInputChange} /></div>
+            </div>
+        </div>
 
+        <div className="space-y-4">
+            <h3 className="text-lg font-semibold">3. HR Summary</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                 <div className="space-y-2"><Label htmlFor="staffCount">Total staff on site</Label><Input id="staffCount" name="staffCount" type="number" value={formData.staffCount} onChange={handleInputChange} /></div>
+                 <div className="space-y-2"><Label htmlFor="leaveDays">Leave taken (days)</Label><Input id="leaveDays" name="leaveDays" type="number" value={formData.leaveDays} onChange={handleInputChange} /></div>
+            </div>
+        </div>
       </CardContent>
        <CardFooter className="flex flex-col items-start gap-8 border-t pt-6">
           <div className="w-full space-y-4">
-              <div className="flex flex-wrap items-end gap-6">
-                <SignaturePad sigPadRef={preparedBySigRef} title="Prepared By Signature" />
-                <div className="grid w-full max-w-xs items-center gap-1.5">
-                    <Label htmlFor="preparedByDate">Date</Label>
-                    <Input id="preparedByDate" name="preparedByDate" type="date" value={formData.preparedByDate} onChange={handleInputChange} />
+              <h3 className="font-semibold">Approval</h3>
+              <div className="grid md:grid-cols-2 gap-6 items-end">
+                <div className="space-y-2">
+                    <Label htmlFor="approvedBy">Approved By</Label>
+                    <Input id="approvedBy" name="approvedBy" value={formData.approvedBy} onChange={handleInputChange}/>
+                </div>
+                 <div className="grid w-full max-w-xs items-center gap-1.5">
+                    <Label htmlFor="approvedByDate">Date</Label>
+                    <Input id="approvedByDate" name="approvedByDate" type="date" value={formData.approvedByDate} onChange={handleInputChange} />
                 </div>
               </div>
-          </div>
-          <div className="w-full space-y-4">
-               <div className="space-y-2">
-                    <Label htmlFor="reviewedBy">Reviewed By</Label>
-                    <Input id="reviewedBy" name="reviewedBy" value={formData.reviewedBy} onChange={handleInputChange} className="max-w-sm"/>
-                </div>
-              <div className="flex flex-wrap items-end gap-6">
-                <SignaturePad sigPadRef={reviewedBySigRef} title="Reviewed By Signature" />
-                 <div className="grid w-full max-w-xs items-center gap-1.5">
-                    <Label htmlFor="reviewedByDate">Date</Label>
-                    <Input id="reviewedByDate" name="reviewedByDate" type="date" value={formData.reviewedByDate} onChange={handleInputChange} />
-                </div>
+               <div className="flex flex-wrap items-end gap-6">
+                <SignaturePad sigPadRef={approvedBySigRef} title="Signature" />
               </div>
           </div>
           <div className="w-full flex justify-end gap-2">
@@ -241,5 +267,3 @@ export function ProjectReportForm() {
     </Card>
   );
 }
-
-    

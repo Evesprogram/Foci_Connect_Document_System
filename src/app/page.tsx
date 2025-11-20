@@ -9,7 +9,7 @@ import { LogSheetForm } from '@/components/log-sheet-form';
 import { ProjectReportForm } from '@/components/project-report-form';
 import { SiteIncidentReportForm } from '@/components/site-incident-report-form';
 import { Button } from '@/components/ui/button';
-import { HomeIcon, Sheet, FileText, FilePlus } from 'lucide-react';
+import { HomeIcon, Sheet, FileText, FilePlus, Briefcase } from 'lucide-react';
 import { HomePage } from '@/components/home-page';
 import { TaxInvoiceForm } from '@/components/tax-invoice-form';
 import { PurchaseOrderForm } from '@/components/purchase-order-form';
@@ -86,8 +86,8 @@ export default function Home() {
             Log Sheet
           </NavButton>
           <NavButton active={activeDocument === 'report'} onClick={() => setActiveDocument('report')}>
-            <Sheet className="mr-2 h-4 w-4" />
-            Project Report
+            <Briefcase className="mr-2 h-4 w-4" />
+            Month-End Report
           </NavButton>
            <NavButton active={activeDocument === 'incident'} onClick={() => setActiveDocument('incident')}>
             <FileText className="mr-2 h-4 w-4" />

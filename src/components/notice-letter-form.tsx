@@ -61,10 +61,10 @@ export function NoticeLetterForm() {
   };
   
   const handleShare = () => {
-    console.log("Sending to Power Automate URL:", powerAutomateUrl);
+    handleExport();
     toast({
-      title: "Sent to Workflow",
-      description: "The document has been sent to the Power Automate flow.",
+      title: "Document Exported",
+      description: "Your document has been downloaded and is ready for sharing.",
     });
   };
 
@@ -243,12 +243,12 @@ export function NoticeLetterForm() {
                 <DialogHeader>
                 <DialogTitle>Share Document</DialogTitle>
                 <DialogDescription>
-                    Enter a Power Automate URL to send this document to a workflow.
+                    This will export the document, allowing you to share it manually. Enter a workflow URL below for future integrations.
                 </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                     <div className="space-y-2">
-                        <Label htmlFor="powerAutomateUrl">Power Automate URL</Label>
+                        <Label htmlFor="powerAutomateUrl">Power Automate URL (Optional)</Label>
                         <Input 
                             id="powerAutomateUrl" 
                             placeholder="https://prod.azure.com/..." 
@@ -258,7 +258,7 @@ export function NoticeLetterForm() {
                     </div>
                 </div>
                 <DialogFooter>
-                <Button onClick={handleShare}>Send to Power Automate</Button>
+                <Button onClick={handleShare}>Download for Sharing</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

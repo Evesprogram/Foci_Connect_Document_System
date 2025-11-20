@@ -17,7 +17,10 @@ import { useToast } from "@/hooks/use-toast";
 import { Share2 } from "lucide-react";
 
 const base64ToArrayBuffer = (base64: string): ArrayBuffer => {
-  const binary_string = window.atob(base64);
+  if (!base64 || base64.indexOf(',') === -1) {
+    throw new Error('Invalid base64 string');
+  }
+  const binary_string = window.atob(base64.split(",")[1]);
   const len = binary_string.length;
   const bytes = new Uint8Array(len);
   for (let i = 0; i < len; i++) {
@@ -79,11 +82,10 @@ export function SiteIncidentReportForm() {
   const addTableRow = (setter: any, initialRow: any) => () => setter((prev: any) => [...prev, initialRow]);
 
   const handleShare = () => {
-    // In a real implementation, you would post the document data to this URL.
-    console.log("Sending to Power Automate URL:", powerAutomateUrl);
+    handleExport();
     toast({
-      title: "Sent to Workflow",
-      description: "The document has been sent to the Power Automate flow.",
+      title: "Document Exported",
+      description: "Your document has been downloaded and is ready for sharing.",
     });
   };
 
@@ -91,22 +93,19 @@ export function SiteIncidentReportForm() {
     const getSignatureImage = (ref: React.RefObject<SignatureCanvas>) => {
       if (ref.current && !ref.current.isEmpty()) {
         const dataUrl = ref.current.getTrimmedCanvas().toDataURL("image/png");
-        return dataUrl.split(",")[1];
+        return base64ToArrayBuffer(dataUrl);
       }
       return null;
     };
 
-    const preparedBySigBase64 = getSignatureImage(preparedBySigRef);
-    const reviewedBySigBase64 = getSignatureImage(reviewedBySigRef);
+    const preparedBySig = getSignatureImage(preparedBySigRef);
+    const reviewedBySig = getSignatureImage(reviewedBySigRef);
     
-    if (!preparedBySigBase64) {
+    if (!preparedBySig) {
       alert("Please provide the 'Prepared By' signature.");
       return;
     }
     
-    const preparedBySig = base64ToArrayBuffer(preparedBySigBase64);
-    const reviewedBySig = reviewedBySigBase64 ? base64ToArrayBuffer(reviewedBySigBase64) : null;
-
     const createSection = (title: string, content: string) => [
         new Paragraph({ text: title, bold: true, spacing: { before: 200 } }),
         ...content.split('\n').map(p => new Paragraph({ text: p })),
@@ -318,12 +317,12 @@ export function SiteIncidentReportForm() {
                 <DialogHeader>
                   <DialogTitle>Share Document</DialogTitle>
                   <DialogDescription>
-                    Enter a Power Automate URL to send this document to a workflow.
+                    This will export the document, allowing you to share it manually. Enter a workflow URL below for future integrations.
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                     <div className="space-y-2">
-                        <Label htmlFor="powerAutomateUrl">Power Automate URL</Label>
+                        <Label htmlFor="powerAutomateUrl">Power Automate URL (Optional)</Label>
                         <Input 
                             id="powerAutomateUrl" 
                             placeholder="https://prod.azure.com/..." 
@@ -333,7 +332,7 @@ export function SiteIncidentReportForm() {
                     </div>
                 </div>
                 <DialogFooter>
-                  <Button onClick={handleShare}>Send to Power Automate</Button>
+                  <Button onClick={handleShare}>Download for Sharing</Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
@@ -343,5 +342,3 @@ export function SiteIncidentReportForm() {
     </Card>
   );
 }
-
-    

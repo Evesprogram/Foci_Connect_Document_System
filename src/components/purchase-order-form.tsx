@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "./ui/textarea";
 import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, BorderStyle, HeadingLevel, AlignmentType, ImageRun } from "docx";
 import { saveAs } from "file-saver";
 import { PlusCircle, Trash2, Share2 } from "lucide-react";
@@ -20,6 +19,9 @@ const initialLineItem = { description: "", qty: 1, unitPrice: 0 };
 const VAT_RATE = 0.15;
 
 const base64ToArrayBuffer = (base64: string): ArrayBuffer => {
+  if (!base64 || base64.indexOf(',') === -1) {
+    throw new Error('Invalid base64 string');
+  }
   const binary_string = window.atob(base64.split(",")[1]);
   const len = binary_string.length;
   const bytes = new Uint8Array(len);
@@ -85,10 +87,10 @@ export function PurchaseOrderForm() {
   };
   
   const handleShare = () => {
-    console.log("Sending to Power Automate URL:", powerAutomateUrl);
+    handleExport();
     toast({
-      title: "Sent to Workflow",
-      description: "The document has been sent to the Power Automate flow.",
+      title: "Document Exported",
+      description: "Your document has been downloaded and is ready for sharing.",
     });
   };
 
@@ -287,12 +289,12 @@ export function PurchaseOrderForm() {
                 <DialogHeader>
                 <DialogTitle>Share Document</DialogTitle>
                 <DialogDescription>
-                    Enter a Power Automate URL to send this document to a workflow.
+                    This will export the document, allowing you to share it manually. Enter a workflow URL below for future integrations.
                 </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                     <div className="space-y-2">
-                        <Label htmlFor="powerAutomateUrl">Power Automate URL</Label>
+                        <Label htmlFor="powerAutomateUrl">Power Automate URL (Optional)</Label>
                         <Input 
                             id="powerAutomateUrl" 
                             placeholder="https://prod.azure.com/..." 
@@ -302,7 +304,7 @@ export function PurchaseOrderForm() {
                     </div>
                 </div>
                 <DialogFooter>
-                <Button onClick={handleShare}>Send to Power Automate</Button>
+                <Button onClick={handleShare}>Download for Sharing</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

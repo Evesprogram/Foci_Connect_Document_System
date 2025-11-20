@@ -16,8 +16,11 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { useToast } from "@/hooks/use-toast";
 import { Share2 } from "lucide-react";
 
-const base64ToArrayBuffer = (base64: string) => {
-  const binary_string = window.atob(base64);
+const base64ToArrayBuffer = (base64: string): ArrayBuffer => {
+  if (!base64 || base64.indexOf(',') === -1) {
+    throw new Error('Invalid base64 string');
+  }
+  const binary_string = window.atob(base64.split(",")[1]);
   const len = binary_string.length;
   const bytes = new Uint8Array(len);
   for (let i = 0; i < len; i++) {
@@ -61,11 +64,10 @@ export function LeaveApplicationForm() {
   };
 
   const handleShare = () => {
-    // In a real implementation, you would post the document data to this URL.
-    console.log("Sending to Power Automate URL:", powerAutomateUrl);
+    handleExport();
     toast({
-      title: "Sent to Workflow",
-      description: "The document has been sent to the Power Automate flow.",
+      title: "Document Exported",
+      description: "Your document has been downloaded and is ready for sharing.",
     });
   };
 
@@ -73,23 +75,19 @@ export function LeaveApplicationForm() {
     const getSignatureImage = (ref: React.RefObject<SignatureCanvas>) => {
       if (ref.current && !ref.current.isEmpty()) {
         const dataUrl = ref.current.getTrimmedCanvas().toDataURL("image/png");
-        return dataUrl.split(",")[1];
+        return base64ToArrayBuffer(dataUrl);
       }
       return null;
     };
 
-    const employeeSignatureBase64 = getSignatureImage(employeeSigRef);
-    const supervisorSignatureBase64 = getSignatureImage(supervisorSigRef);
-    const hrSignatureBase64 = getSignatureImage(hrSigRef);
+    const employeeSignature = getSignatureImage(employeeSigRef);
+    const supervisorSignature = getSignatureImage(supervisorSigRef);
+    const hrSignature = getSignatureImage(hrSigRef);
 
-    if (!employeeSignatureBase64) {
+    if (!employeeSignature) {
       alert("Please provide the employee's signature.");
       return;
     }
-
-    const employeeSignature = base64ToArrayBuffer(employeeSignatureBase64);
-    const supervisorSignature = supervisorSignatureBase64 ? base64ToArrayBuffer(supervisorSignatureBase64) : null;
-    const hrSignature = hrSignatureBase64 ? base64ToArrayBuffer(hrSignatureBase64) : null;
 
     const doc = new Document({
       sections: [{
@@ -255,12 +253,12 @@ export function LeaveApplicationForm() {
                 <DialogHeader>
                   <DialogTitle>Share Document</DialogTitle>
                   <DialogDescription>
-                    Enter a Power Automate URL to send this document to a workflow.
+                    This will export the document, allowing you to share it manually. Enter a workflow URL below for future integrations.
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                     <div className="space-y-2">
-                        <Label htmlFor="powerAutomateUrl">Power Automate URL</Label>
+                        <Label htmlFor="powerAutomateUrl">Power Automate URL (Optional)</Label>
                         <Input 
                             id="powerAutomateUrl" 
                             placeholder="https://prod.azure.com/..." 
@@ -270,7 +268,7 @@ export function LeaveApplicationForm() {
                     </div>
                 </div>
                 <DialogFooter>
-                  <Button onClick={handleShare}>Send to Power Automate</Button>
+                  <Button onClick={handleShare}>Download for Sharing</Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
@@ -280,5 +278,3 @@ export function LeaveApplicationForm() {
     </Card>
   );
 }
-
-    

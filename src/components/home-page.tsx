@@ -23,7 +23,7 @@ import { useFormStatus } from "react-dom";
 import { useActionState } from "react";
 
 
-import { Document, Packer, Paragraph, TextRun, HeadingLevel } from "docx";
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from "docx";
 import { saveAs } from "file-saver";
 import { FociLogo } from "./foci-logo";
 
@@ -183,26 +183,27 @@ export function HomePage() {
   const handleExport = async () => {
     const doc = new Document({
       sections: [{
+        properties: {},
         children: [
-          new Paragraph({ text: "FOCI GROUP", heading: HeadingLevel.TITLE, alignment: "center" }),
-          new Paragraph({ text: "Engineering | ICT | Smart Automation", alignment: "center" }),
+          new Paragraph({ children: [new TextRun({ text: "FOCI GROUP", bold: true})], alignment: AlignmentType.CENTER, heading: HeadingLevel.TITLE }),
+          new Paragraph({ text: "Engineering | ICT | Smart Automation", alignment: AlignmentType.CENTER }),
           new Paragraph({ text: "" }),
           
-          new Paragraph({ text: "Integrated Solutions for a Modern World", heading: HeadingLevel.HEADING_1, alignment: "center" }),
-          new Paragraph({ text: "FOCI Group delivers excellence in Engineering, ICT, and Smart Automation, providing innovative and reliable solutions tailored to your needs.", alignment: "center" }),
+          new Paragraph({ text: "Integrated Solutions for a Modern World", heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER }),
+          new Paragraph({ text: "FOCI Group delivers excellence in Engineering, ICT, and Smart Automation, providing innovative and reliable solutions tailored to your needs.", alignment: AlignmentType.CENTER }),
           new Paragraph({ text: "" }),
 
           new Paragraph({ text: "Our Services", heading: HeadingLevel.HEADING_2 }),
           
-          new Paragraph({ text: "Engineering", style: "IntenseQuote" }),
+          new Paragraph({ children: [new TextRun({ text: "Engineering", bold: true })] }),
           new Paragraph({ text: "Providing top-tier engineering solutions across various sectors, ensuring quality, safety, and efficiency in every project." }),
           new Paragraph({ text: "" }),
           
-          new Paragraph({ text: "ICT", style: "IntenseQuote" }),
+          new Paragraph({ children: [new TextRun({ text: "ICT", bold: true })] }),
           new Paragraph({ text: "Delivering robust Information and Communications Technology infrastructure, services, and support to keep your business connected." }),
           new Paragraph({ text: "" }),
           
-          new Paragraph({ text: "Smart Automation", style: "IntenseQuote" }),
+          new Paragraph({ children: [new TextRun({ text: "Smart Automation", bold: true })] }),
           new Paragraph({ text: "Implementing intelligent automation systems to streamline operations, increase productivity, and drive business growth." }),
           new Paragraph({ text: "" }),
 

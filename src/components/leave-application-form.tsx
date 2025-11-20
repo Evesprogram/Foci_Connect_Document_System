@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import SignatureCanvas from "react-signature-canvas";
-import { Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, WidthType, BorderStyle, HeadingLevel } from "docx";
+import { Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, WidthType, BorderStyle, HeadingLevel, AlignmentType } from "docx";
 import { saveAs } from "file-saver";
 import { Textarea } from "./ui/textarea";
 import {
@@ -27,11 +27,7 @@ import { useToast } from "@/hooks/use-toast";
 const SignaturePad = dynamic(() => import('./signature-pad').then(mod => mod.SignaturePad), { ssr: false });
 
 const base64ToArrayBuffer = (base64: string): ArrayBuffer => {
-  if (!base64 || base64.indexOf(',') === -1) {
-    throw new Error('Invalid base64 string');
-  }
-  const base64Data = base64.split(",")[1];
-  return Buffer.from(base64Data, 'base64').buffer;
+    return Buffer.from(base64.split(",")[1], 'base64');
 };
 
 export function LeaveApplicationForm() {
@@ -39,7 +35,9 @@ export function LeaveApplicationForm() {
   const [currentUrl, setCurrentUrl] = useState('');
 
   useEffect(() => {
-    setCurrentUrl(window.location.href);
+    if (typeof window !== 'undefined') {
+      setCurrentUrl(window.location.href);
+    }
   }, []);
 
   const [formData, setFormData] = useState({
@@ -108,7 +106,7 @@ export function LeaveApplicationForm() {
     const doc = new Document({
       sections: [{
         children: [
-          new Paragraph({ text: "LEAVE APPLICATION FORM", heading: HeadingLevel.TITLE, alignment: "center" }),
+          new Paragraph({ text: "LEAVE APPLICATION FORM", heading: HeadingLevel.TITLE, alignment: AlignmentType.CENTER }),
           new Paragraph({ text: "" }),
           new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
@@ -119,12 +117,12 @@ export function LeaveApplicationForm() {
             ]
           }),
           new Paragraph({ text: "" }),
-          new Paragraph({ text: "Type of Leave Requested:", bold: true }),
+          new Paragraph({ children: [new TextRun({ text: "Type of Leave Requested:", bold: true })] }),
           new Paragraph({ text: `[${formData.leaveType === 'annual' ? 'X' : ' '}] Annual Leave\t\t[${formData.leaveType === 'sick' ? 'X' : ' '}] Sick Leave\t\t[${formData.leaveType === 'family' ? 'X' : ' '}] Family Responsibility` }),
           new Paragraph({ text: `[${formData.leaveType === 'maternity' ? 'X' : ' '}] Maternity/Paternity\t[${formData.leaveType === 'study' ? 'X' : ' '}] Study\t\t[${formData.leaveType === 'unpaid' ? 'X' : ' '}] Unpaid` }),
           new Paragraph({ children: [new TextRun({ text: `[${formData.leaveType === 'other' ? 'X' : ' '}] Other: ${formData.otherLeaveType}`})] }),
           new Paragraph({ text: "" }),
-          new Paragraph({ text: "Leave Period:", bold: true }),
+          new Paragraph({ children: [new TextRun({ text: "Leave Period:", bold: true })] }),
            new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
             borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE }, insideHorizontal: { style: BorderStyle.NONE }, insideVertical: { style: BorderStyle.NONE } },
@@ -140,21 +138,21 @@ export function LeaveApplicationForm() {
             ]
           }),
           new Paragraph({ text: "" }),
-          new Paragraph({ text: "Reason for Leave (detailed):", bold: true }),
+          new Paragraph({ children: [new TextRun({ text: "Reason for Leave (detailed):", bold: true })] }),
           ...formData.reason.split('\n').map(p => new Paragraph({ text: p })),
           new Paragraph({ text: "" }),
-          new Paragraph({ text: "Employee Declaration:", bold: true }),
+          new Paragraph({ children: [new TextRun({ text: "Employee Declaration:", bold: true })] }),
           new Paragraph({ text: "I confirm the information above is correct." }),
           new Paragraph({ children: [new TextRun({ text: "Signature:", bold: true })] }),
           new Paragraph({ children: [new ImageRun({ data: employeeSignature, transformation: { width: 150, height: 75 } })] }),
           new Paragraph({ children: [new TextRun({ text: `Date: ${formData.employeeSignatureDate}` })] }),
           new Paragraph({ text: "" }),
-          new Paragraph({ text: "Supervisor/Manager Recommendation:", bold: true }),
+          new Paragraph({ children: [new TextRun({ text: "Supervisor/Manager Recommendation:", bold: true })] }),
           new Paragraph({ children: [new TextRun({ text: "Signature:", bold: true })] }),
           ...(supervisorSignature ? [new Paragraph({ children: [new ImageRun({ data: supervisorSignature, transformation: { width: 150, height: 75 } })] })] : [new Paragraph('')]),
           new Paragraph({ children: [new TextRun({ text: `Date: ${formData.supervisorSignatureDate}` })] }),
           new Paragraph({ text: "" }),
-          new Paragraph({ text: "HR / Director Final Approval:", bold: true }),
+          new Paragraph({ children: [new TextRun({ text: "HR / Director Final Approval:", bold: true })] }),
           new Paragraph({ children: [new TextRun({ text: "Signature:", bold: true })] }),
           ...(hrSignature ? [new Paragraph({ children: [new ImageRun({ data: hrSignature, transformation: { width: 150, height: 75 } })] })] : [new Paragraph('')]),
           new Paragraph({ children: [new TextRun({ text: `Date: ${formData.hrSignatureDate}` })] }),

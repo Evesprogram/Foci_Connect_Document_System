@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "./ui/textarea";
-import { Document, Packer, Paragraph, Table, TableRow, TableCell, WidthType, BorderStyle, HeadingLevel, AlignmentType } from "docx";
+import { Document, Packer, Paragraph, Table, TableRow, TableCell, WidthType, BorderStyle, HeadingLevel, AlignmentType, TextRun } from "docx";
 import { saveAs } from "file-saver";
 import { PlusCircle, Trash2, Share2, Copy } from "lucide-react";
 import {
@@ -30,7 +30,9 @@ export function TaxInvoiceForm() {
   const [currentUrl, setCurrentUrl] = useState('');
 
   useEffect(() => {
-    setCurrentUrl(window.location.href);
+    if (typeof window !== 'undefined') {
+      setCurrentUrl(window.location.href);
+    }
   }, []);
   
   const [invoiceNo, setInvoiceNo] = useState("");
@@ -103,7 +105,7 @@ export function TaxInvoiceForm() {
     const doc = new Document({
       sections: [{
         children: [
-          new Paragraph({ text: "FOCI GROUP (Pty) Ltd", bold: true, alignment: AlignmentType.CENTER }),
+          new Paragraph({ children: [new TextRun({ text: "FOCI GROUP (Pty) Ltd", bold: true })], alignment: AlignmentType.CENTER }),
           new Paragraph({ text: "TAX INVOICE", heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER }),
           new Paragraph(""),
 
@@ -129,7 +131,7 @@ export function TaxInvoiceForm() {
                 children: [
                   new TableCell({
                     children: [
-                      new Paragraph({ text: "Bill To:", bold: true }),
+                      new Paragraph({ children: [new TextRun({ text: "Bill To:", bold: true })] }),
                       ...clientName.split('\n').map(p => new Paragraph(p)),
                       ...clientAddress.split('\n').map(p => new Paragraph(p)),
                       ...clientVat.split('\n').map(p => new Paragraph(p)),
@@ -137,7 +139,7 @@ export function TaxInvoiceForm() {
                   }),
                   new TableCell({
                     children: [
-                      new Paragraph({ text: "Ship To:", bold: true }),
+                      new Paragraph({ children: [new TextRun({ text: "Ship To:", bold: true })] }),
                       ...siteAddress.split('\n').map(p => new Paragraph(p)),
                     ]
                   }),
@@ -153,11 +155,11 @@ export function TaxInvoiceForm() {
               new TableRow({
                 tableHeader: true,
                 children: [
-                  new TableCell({ children: [new Paragraph({ text: "Item", bold: true })] }),
-                  new TableCell({ children: [new Paragraph({ text: "Description", bold: true })] }),
-                  new TableCell({ children: [new Paragraph({ text: "Qty", bold: true })] }),
-                  new TableCell({ children: [new Paragraph({ text: "Unit Price", bold: true })] }),
-                  new TableCell({ children: [new Paragraph({ text: "Line Total", bold: true })] }),
+                  new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Item", bold: true })] })] }),
+                  new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Description", bold: true })] })] }),
+                  new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Qty", bold: true })] })] }),
+                  new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Unit Price", bold: true })] })] }),
+                  new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Line Total", bold: true })] })] }),
                 ],
               }),
               ...lineItems.map((item, index) => new TableRow({
@@ -179,13 +181,13 @@ export function TaxInvoiceForm() {
             rows: [
               new TableRow({ children: [new TableCell({ children: [] }), new TableCell({ children: [new Paragraph({ text: "Subtotal:", alignment: AlignmentType.RIGHT })] }), new TableCell({ children: [new Paragraph({ text: `R ${formatCurrency(subtotal)}`, alignment: AlignmentType.RIGHT })] })] }),
               new TableRow({ children: [new TableCell({ children: [] }), new TableCell({ children: [new Paragraph({ text: "VAT (15%):", alignment: AlignmentType.RIGHT })] }), new TableCell({ children: [new Paragraph({ text: `R ${formatCurrency(vat)}`, alignment: AlignmentType.RIGHT })] })] }),
-              new TableRow({ children: [new TableCell({ children: [] }), new TableCell({ children: [new Paragraph({ text: "TOTAL AMOUNT DUE:", bold: true, alignment: AlignmentType.RIGHT })] }), new TableCell({ children: [new Paragraph({ text: `R ${formatCurrency(total)}`, bold: true, alignment: AlignmentType.RIGHT })] })] }),
+              new TableRow({ children: [new TableCell({ children: [] }), new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "TOTAL AMOUNT DUE:", bold: true })], alignment: AlignmentType.RIGHT })] }), new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: `R ${formatCurrency(total)}`, bold: true })], alignment: AlignmentType.RIGHT })] })] }),
             ]
           }),
           new Paragraph(""),
-          new Paragraph({ text: `Bank Details: FNB | Acc: 628 495 821 33 | Branch: 25-01-55 | Ref: ${invoiceNo}`, bold: true }),
+          new Paragraph({ children: [new TextRun({ text: `Bank Details: FNB | Acc: 628 495 821 33 | Branch: 25-01-55 | Ref: ${invoiceNo}`, bold: true })] }),
           new Paragraph(""),
-          new Paragraph({ text: "Terms: Payment within 30 days of invoice date.", italics: true }),
+          new Paragraph({ children: [new TextRun({ text: "Terms: Payment within 30 days of invoice date.", italics: true })] }),
         ],
       }]
     });

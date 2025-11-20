@@ -29,11 +29,7 @@ const initialLineItem = { description: "", qty: 1, unitPrice: 0 };
 const VAT_RATE = 0.15;
 
 const base64ToArrayBuffer = (base64: string): ArrayBuffer => {
-  if (!base64 || base64.indexOf(',') === -1) {
-    throw new Error('Invalid base64 string');
-  }
-  const base64Data = base64.split(",")[1];
-  return Buffer.from(base64Data, 'base64').buffer;
+    return Buffer.from(base64.split(",")[1], 'base64');
 };
 
 export function PurchaseOrderForm() {
@@ -41,7 +37,9 @@ export function PurchaseOrderForm() {
   const [currentUrl, setCurrentUrl] = useState('');
 
   useEffect(() => {
-    setCurrentUrl(window.location.href);
+    if (typeof window !== 'undefined') {
+      setCurrentUrl(window.location.href);
+    }
   }, []);
   
   const [orderNo, setOrderNo] = useState("");
@@ -122,7 +120,7 @@ export function PurchaseOrderForm() {
     const doc = new Document({
       sections: [{
         children: [
-          new Paragraph({ text: "FOCI GROUP (Pty) Ltd", bold: true, alignment: AlignmentType.CENTER }),
+          new Paragraph({ children: [new TextRun({ text: "FOCI GROUP (Pty) Ltd", bold: true })], alignment: AlignmentType.CENTER }),
           new Paragraph({ text: "PURCHASE ORDER", heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER }),
           new Paragraph(""),
 
@@ -152,11 +150,11 @@ export function PurchaseOrderForm() {
               new TableRow({
                 tableHeader: true,
                 children: [
-                  new TableCell({ children: [new Paragraph({ text: "Item", bold: true })] }),
-                  new TableCell({ children: [new Paragraph({ text: "Description", bold: true })] }),
-                  new TableCell({ children: [new Paragraph({ text: "Qty", bold: true })] }),
-                  new TableCell({ children: [new Paragraph({ text: "Unit Price", bold: true })] }),
-                  new TableCell({ children: [new Paragraph({ text: "Total", bold: true })] }),
+                  new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Item", bold: true })] })] }),
+                  new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Description", bold: true })] })] }),
+                  new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Qty", bold: true })] })] }),
+                  new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Unit Price", bold: true })] })] }),
+                  new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Total", bold: true })] })] }),
                 ],
               }),
               ...lineItems.map((item, index) => new TableRow({
@@ -178,7 +176,7 @@ export function PurchaseOrderForm() {
             rows: [
               new TableRow({ children: [new TableCell({ children: [] }), new TableCell({ children: [new Paragraph({ text: "Total Order Value (excl VAT):", alignment: AlignmentType.RIGHT })] }), new TableCell({ children: [new Paragraph({ text: `R ${formatCurrency(totalExcl)}`, alignment: AlignmentType.RIGHT })] })] }),
               new TableRow({ children: [new TableCell({ children: [] }), new TableCell({ children: [new Paragraph({ text: "VAT:", alignment: AlignmentType.RIGHT })] }), new TableCell({ children: [new Paragraph({ text: `R ${formatCurrency(vat)}`, alignment: AlignmentType.RIGHT })] })] }),
-              new TableRow({ children: [new TableCell({ children: [] }), new TableCell({ children: [new Paragraph({ text: "Total Order Value (incl VAT):", bold: true, alignment: AlignmentType.RIGHT })] }), new TableCell({ children: [new Paragraph({ text: `R ${formatCurrency(totalIncl)}`, bold: true, alignment: AlignmentType.RIGHT })] })] }),
+              new TableRow({ children: [new TableCell({ children: [] }), new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Total Order Value (incl VAT):", bold: true })], alignment: AlignmentType.RIGHT })] }), new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: `R ${formatCurrency(totalIncl)}`, bold: true })], alignment: AlignmentType.RIGHT })] })] }),
             ]
           }),
           new Paragraph(""),

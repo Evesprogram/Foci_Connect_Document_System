@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import SignatureCanvas from "react-signature-canvas";
-import { Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, WidthType, BorderStyle, HeadingLevel } from "docx";
+import { Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, WidthType, BorderStyle, HeadingLevel, AlignmentType } from "docx";
 import { saveAs } from "file-saver";
 import {
   Dialog,
@@ -34,11 +34,7 @@ const MemoInputRow = ({ label, id, value, onChange }: { label: string; id: strin
 );
 
 const base64ToArrayBuffer = (base64: string): ArrayBuffer => {
-  if (!base64 || base64.indexOf(',') === -1) {
-    throw new Error('Invalid base64 string');
-  }
-  const base64Data = base64.split(",")[1];
-  return Buffer.from(base64Data, 'base64').buffer;
+    return Buffer.from(base64.split(",")[1], 'base64');
 };
 
 export function MemorandumForm() {
@@ -46,7 +42,9 @@ export function MemorandumForm() {
   const [currentUrl, setCurrentUrl] = useState('');
 
   useEffect(() => {
-    setCurrentUrl(window.location.href);
+    if (typeof window !== 'undefined') {
+      setCurrentUrl(window.location.href);
+    }
   }, []);
   
   const [formData, setFormData] = useState({
@@ -94,7 +92,7 @@ export function MemorandumForm() {
     const doc = new Document({
       sections: [{
         children: [
-          new Paragraph({ text: "MEMORANDUM", heading: HeadingLevel.TITLE, alignment: "center" }),
+          new Paragraph({ text: "MEMORANDUM", heading: HeadingLevel.TITLE, alignment: AlignmentType.CENTER }),
           new Paragraph({ text: "" }),
           new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
@@ -108,7 +106,7 @@ export function MemorandumForm() {
           new Paragraph({ text: "" }),
           ...formData.body.split('\n').map(p => new Paragraph({ text: p })),
           new Paragraph({ text: "" }),
-          new Paragraph({ text: "Action Required:", bold: true }),
+          new Paragraph({ children: [new TextRun({ text: "Action Required:", bold: true })] }),
           new Paragraph({ text: formData.actionRequired }),
           new Paragraph({ text: "" }),
           new Paragraph({ children: [new TextRun({ text: "Signature:", bold: true })] }),

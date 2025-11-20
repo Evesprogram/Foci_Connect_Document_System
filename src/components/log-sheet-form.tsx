@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import SignatureCanvas from "react-signature-canvas";
-import { Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, WidthType, BorderStyle, HeadingLevel } from "docx";
+import { Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, WidthType, BorderStyle, HeadingLevel, AlignmentType } from "docx";
 import { saveAs } from "file-saver";
 import { Textarea } from "./ui/textarea";
 import {
@@ -31,11 +31,7 @@ const initialRows = Array.from({ length: 7 }, () => ({
 }));
 
 const base64ToArrayBuffer = (base64: string): ArrayBuffer => {
-  if (!base64 || base64.indexOf(',') === -1) {
-    throw new Error('Invalid base64 string');
-  }
-  const base64Data = base64.split(",")[1];
-  return Buffer.from(base64Data, 'base64').buffer;
+    return Buffer.from(base64.split(",")[1], 'base64');
 };
 
 export function LogSheetForm() {
@@ -43,7 +39,9 @@ export function LogSheetForm() {
   const [currentUrl, setCurrentUrl] = useState('');
 
   useEffect(() => {
-    setCurrentUrl(window.location.href);
+    if (typeof window !== 'undefined') {
+      setCurrentUrl(window.location.href);
+    }
   }, []);
 
   const [formData, setFormData] = useState({
@@ -110,13 +108,14 @@ export function LogSheetForm() {
     }
 
     const tableHeader = new TableRow({
+      tableHeader: true,
       children: [
-        new TableCell({ children: [new Paragraph({text: "Date", bold: true})] }),
-        new TableCell({ children: [new Paragraph({text: "Time In", bold: true})] }),
-        new TableCell({ children: [new Paragraph({text: "Time Out", bold: true})] }),
-        new TableCell({ children: [new Paragraph({text: "Total Hours", bold: true})] }),
-        new TableCell({ children: [new Paragraph({text: "Role / Tasks", bold: true})] }),
-        new TableCell({ children: [new Paragraph({text: "Remarks", bold: true})] }),
+        new TableCell({ children: [new Paragraph({children: [new TextRun({text: "Date", bold: true})]})] }),
+        new TableCell({ children: [new Paragraph({children: [new TextRun({text: "Time In", bold: true})]})] }),
+        new TableCell({ children: [new Paragraph({children: [new TextRun({text: "Time Out", bold: true})]})] }),
+        new TableCell({ children: [new Paragraph({children: [new TextRun({text: "Total Hours", bold: true})]})] }),
+        new TableCell({ children: [new Paragraph({children: [new TextRun({text: "Role / Tasks", bold: true})]})] }),
+        new TableCell({ children: [new Paragraph({children: [new TextRun({text: "Remarks", bold: true})]})] }),
       ],
     });
 
@@ -141,7 +140,7 @@ export function LogSheetForm() {
     const doc = new Document({
       sections: [{
         children: [
-          new Paragraph({ text: "EMPLOYEE DAILY / WEEKLY LOG SHEET", heading: HeadingLevel.TITLE, alignment: "center" }),
+          new Paragraph({ text: "EMPLOYEE DAILY / WEEKLY LOG SHEET", heading: HeadingLevel.TITLE, alignment: AlignmentType.CENTER }),
           new Paragraph({ text: "" }),
           new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
@@ -157,17 +156,17 @@ export function LogSheetForm() {
           new Paragraph({ text: "" }),
           new Paragraph({ children: [new TextRun({ text: `Total Hours this Period: ${formData.totalHours}`}) ]}),
           new Paragraph({ text: "" }),
-          new Paragraph({ text: "Employee Declaration: I confirm the above information is correct.", bold: true }),
+          new Paragraph({ children: [new TextRun({ text: "Employee Declaration: I confirm the above information is correct.", bold: true })] }),
           new Paragraph({ children: [new TextRun({ text: "Signature:", bold: true })] }),
           new Paragraph({ children: [new ImageRun({ data: employeeSignature, transformation: { width: 150, height: 75 } })] }),
           new Paragraph({ children: [new TextRun({ text: `Date: ${formData.employeeDeclarationDate}` })] }),
           new Paragraph({ text: "" }),
-          new Paragraph({ text: "Supervisor / Manager Verification:", bold: true }),
+          new Paragraph({ children: [new TextRun({ text: "Supervisor / Manager Verification:", bold: true })] }),
           new Paragraph({ children: [new TextRun({ text: `Name: ${formData.supervisorName}\tRole: ${formData.supervisorRole}` })] }),
           new Paragraph({ children: [new TextRun({ text: "Signature:", bold: true })] }),
           ...(supervisorSignature ? [new Paragraph({ children: [new ImageRun({ data: supervisorSignature, transformation: { width: 150, height: 75 } })] })] : [new Paragraph('')]),
           new Paragraph({ children: [new TextRun({ text: `Date: ${formData.supervisorSignatureDate}` })] }),
-           new Paragraph({ text: "Comments (if any):", bold: true }),
+           new Paragraph({ children: [new TextRun({ text: "Comments (if any):", bold: true })] }),
           ...formData.supervisorComments.split('\n').map(p => new Paragraph({ text: p })),
         ]
       }]

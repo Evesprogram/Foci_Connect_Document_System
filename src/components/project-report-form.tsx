@@ -26,11 +26,7 @@ import { useToast } from "@/hooks/use-toast";
 const SignaturePad = dynamic(() => import('./signature-pad').then(mod => mod.SignaturePad), { ssr: false });
 
 const base64ToArrayBuffer = (base64: string): ArrayBuffer => {
-  if (!base64 || base64.indexOf(',') === -1) {
-    throw new Error('Invalid base64 string');
-  }
-  const base64Data = base64.split(",")[1];
-  return Buffer.from(base64Data, 'base64').buffer;
+    return Buffer.from(base64.split(",")[1], 'base64');
 };
 
 export function ProjectReportForm() {
@@ -38,7 +34,9 @@ export function ProjectReportForm() {
   const [currentUrl, setCurrentUrl] = useState('');
 
   useEffect(() => {
-    setCurrentUrl(window.location.href);
+    if (typeof window !== 'undefined') {
+      setCurrentUrl(window.location.href);
+    }
   }, []);
 
   const [formData, setFormData] = useState({
@@ -107,7 +105,7 @@ export function ProjectReportForm() {
     const doc = new Document({
       sections: [{
         children: [
-          new Paragraph({ text: "FOCI GROUP (Pty) Ltd", bold: true, alignment: AlignmentType.CENTER }),
+          new Paragraph({ children: [new TextRun({ text: "FOCI GROUP (Pty) Ltd", bold: true })], alignment: AlignmentType.CENTER }),
           new Paragraph({ text: `MONTH-END REPORT – ${formData.month.toUpperCase()} ${formData.year}`, heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER }),
           new Paragraph(""),
 
@@ -130,7 +128,7 @@ export function ProjectReportForm() {
           }),
           new Paragraph(""),
 
-          new Paragraph({ text: "1. Financial Summary", bold: true, spacing: { before: 200 } }),
+          new Paragraph({ children: [new TextRun({ text: "1. Financial Summary", bold: true })], spacing: { before: 200 } }),
           new Table({
               width: { size: 80, type: WidthType.PERCENTAGE },
               rows: [
@@ -140,7 +138,7 @@ export function ProjectReportForm() {
               ]
           }),
 
-          new Paragraph({ text: "2. Project Progress", bold: true, spacing: { before: 200 } }),
+          new Paragraph({ children: [new TextRun({ text: "2. Project Progress", bold: true })], spacing: { before: 200 } }),
            new Table({
               width: { size: 80, type: WidthType.PERCENTAGE },
               rows: [
@@ -149,7 +147,7 @@ export function ProjectReportForm() {
               ]
           }),
           
-          new Paragraph({ text: "3. HR Summary", bold: true, spacing: { before: 200 } }),
+          new Paragraph({ children: [new TextRun({ text: "3. HR Summary", bold: true })], spacing: { before: 200 } }),
           new Table({
               width: { size: 80, type: WidthType.PERCENTAGE },
               rows: [

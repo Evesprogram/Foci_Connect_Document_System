@@ -28,11 +28,7 @@ const SignaturePad = dynamic(() => import('./signature-pad').then(mod => mod.Sig
 
 
 const base64ToArrayBuffer = (base64: string): ArrayBuffer => {
-  if (!base64 || base64.indexOf(',') === -1) {
-    throw new Error('Invalid base64 string');
-  }
-  const base64Data = base64.split(",")[1];
-  return Buffer.from(base64Data, 'base64').buffer;
+    return Buffer.from(base64.split(",")[1], 'base64');
 };
 
 const initialIssueRow = { issue: "", risk: "", action: "" };
@@ -43,7 +39,9 @@ export function SiteIncidentReportForm() {
   const [currentUrl, setCurrentUrl] = useState('');
 
   useEffect(() => {
-    setCurrentUrl(window.location.href);
+    if (typeof window !== 'undefined') {
+      setCurrentUrl(window.location.href);
+    }
   }, []);
 
   const [formData, setFormData] = useState({
@@ -125,14 +123,14 @@ export function SiteIncidentReportForm() {
     }
     
     const createSection = (title: string, content: string) => [
-        new Paragraph({ text: title, bold: true, spacing: { before: 200 } }),
+        new Paragraph({ children: [new TextRun({ text: title, bold: true })], spacing: { before: 200 } }),
         ...content.split('\n').map(p => new Paragraph({ text: p })),
     ];
 
     const doc = new Document({
       sections: [{
         children: [
-          new Paragraph({ text: "FOCI GROUP (Pty) Ltd", bold: true, alignment: AlignmentType.CENTER }),
+          new Paragraph({ children: [new TextRun({ text: "FOCI GROUP (Pty) Ltd", bold: true })], alignment: AlignmentType.CENTER }),
           new Paragraph({ text: "SITE / PROJECT / INCIDENT REPORT", heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER }),
           new Paragraph({ text: "" }),
           
@@ -159,7 +157,7 @@ export function SiteIncidentReportForm() {
           ...createSection("1. Purpose of Visit / Report", formData.purpose),
           ...createSection("2. Observations / Findings", formData.observations),
 
-          new Paragraph({ text: "3. Issues Identified & Risk Level", bold: true, spacing: { before: 200 } }),
+          new Paragraph({ children: [new TextRun({ text: "3. Issues Identified & Risk Level", bold: true })], spacing: { before: 200 } }),
           new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
             rows: [
@@ -183,7 +181,7 @@ export function SiteIncidentReportForm() {
             ]
           }),
 
-          new Paragraph({ text: "4. Recommendations & Corrective Actions", bold: true, spacing: { before: 200 } }),
+          new Paragraph({ children: [new TextRun({ text: "4. Recommendations & Corrective Actions", bold: true })], spacing: { before: 200 } }),
           new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
             rows: [

@@ -24,6 +24,7 @@ export async function handleSummarize(
     return { ...result, error: null };
   } catch (e) {
     console.error(e);
+    // Ensure the full state object is returned on error to prevent crashes.
     return { summary: '', progress: '', error: 'An unexpected error occurred while summarizing.' };
   }
 }

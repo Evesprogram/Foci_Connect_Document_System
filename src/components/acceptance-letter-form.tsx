@@ -27,11 +27,7 @@ const SignaturePad = dynamic(() => import('./signature-pad').then(mod => mod.Sig
 
 
 const base64ToArrayBuffer = (base64: string): ArrayBuffer => {
-  if (!base64 || base64.indexOf(',') === -1) {
-    throw new Error('Invalid base64 string');
-  }
-  const base64Data = base64.split(",")[1];
-  return Buffer.from(base64Data, 'base64').buffer;
+    return Buffer.from(base64.split(",")[1], 'base64');
 };
 
 export function AcceptanceLetterForm() {
@@ -39,7 +35,9 @@ export function AcceptanceLetterForm() {
   const [currentUrl, setCurrentUrl] = useState('');
 
   useEffect(() => {
-    setCurrentUrl(window.location.href);
+    if (typeof window !== 'undefined') {
+      setCurrentUrl(window.location.href);
+    }
   }, []);
 
   const [formData, setFormData] = useState({
@@ -104,7 +102,7 @@ export function AcceptanceLetterForm() {
     const doc = new Document({
       sections: [{
         children: [
-          new Paragraph({ text: "FOCI GROUP (Pty) Ltd", bold: true, alignment: AlignmentType.CENTER }),
+          new Paragraph({ children: [new TextRun({ text: "FOCI GROUP (Pty) Ltd", bold: true })], alignment: AlignmentType.CENTER }),
           new Paragraph(""),
           new Paragraph({ text: `Ref: ${formData.refNo}`, alignment: AlignmentType.LEFT }),
           new Paragraph({ text: `Date: ${formData.date}`, alignment: AlignmentType.LEFT }),
@@ -278,5 +276,3 @@ export function AcceptanceLetterForm() {
     </Card>
   );
 }
-
-    

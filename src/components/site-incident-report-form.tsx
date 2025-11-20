@@ -12,6 +12,9 @@ import SignatureCanvas from "react-signature-canvas";
 import { Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, WidthType, BorderStyle, HeadingLevel, AlignmentType } from "docx";
 import { saveAs } from "file-saver";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { useToast } from "@/hooks/use-toast";
+import { Share2 } from "lucide-react";
 
 const base64ToArrayBuffer = (base64: string): ArrayBuffer => {
   const binary_string = window.atob(base64);
@@ -49,6 +52,8 @@ export function SiteIncidentReportForm() {
 
   const [issues, setIssues] = useState([initialIssueRow]);
   const [actions, setActions] = useState([initialActionRow]);
+  const [powerAutomateUrl, setPowerAutomateUrl] = useState("");
+  const { toast } = useToast();
 
   const preparedBySigRef = useRef<SignatureCanvas>(null);
   const reviewedBySigRef = useRef<SignatureCanvas>(null);
@@ -73,23 +78,39 @@ export function SiteIncidentReportForm() {
   
   const addTableRow = (setter: any, initialRow: any) => () => setter((prev: any) => [...prev, initialRow]);
 
+  const handleShare = () => {
+    // In a real implementation, you would post the document data to this URL.
+    console.log("Sending to Power Automate URL:", powerAutomateUrl);
+    toast({
+      title: "Sent to Workflow",
+      description: "The document has been sent to the Power Automate flow.",
+    });
+  };
+
   const handleExport = async () => {
-    const getSignatureBuffer = (ref: React.RefObject<SignatureCanvas>): ArrayBuffer | null => {
+    const getSignatureImage = (ref: React.RefObject<SignatureCanvas>) => {
       if (ref.current && !ref.current.isEmpty()) {
         const dataUrl = ref.current.getTrimmedCanvas().toDataURL("image/png");
-        const base64 = dataUrl.replace(/^data:image\/png;base64,/, "");
-        return base64ToArrayBuffer(base64);
+        return dataUrl.split(",")[1];
       }
       return null;
     };
 
-    const preparedBySig = getSignatureBuffer(preparedBySigRef);
-    const reviewedBySig = getSignatureBuffer(reviewedBySigRef);
+    const preparedBySigBase64 = getSignatureImage(preparedBySigRef);
+    const reviewedBySigBase64 = getSignatureImage(reviewedBySigRef);
     
-    if (!preparedBySig) {
+    if (!preparedBySigBase64) {
       alert("Please provide the 'Prepared By' signature.");
       return;
     }
+    
+    const preparedBySig = base64ToArrayBuffer(preparedBySigBase64);
+    const reviewedBySig = reviewedBySigBase64 ? base64ToArrayBuffer(reviewedBySigBase64) : null;
+
+    const createSection = (title: string, content: string) => [
+        new Paragraph({ text: title, bold: true, spacing: { before: 200 } }),
+        ...content.split('\n').map(p => new Paragraph({ text: p })),
+    ];
 
     const doc = new Document({
       sections: [{
@@ -118,10 +139,8 @@ export function SiteIncidentReportForm() {
              ]
           }),
 
-          new Paragraph({ text: "1. Purpose of Visit / Report", bold: true, spacing: { before: 200 } }),
-          new Paragraph({ text: formData.purpose }),
-          new Paragraph({ text: "2. Observations / Findings", bold: true, spacing: { before: 200 } }),
-          new Paragraph({ text: formData.observations }),
+          ...createSection("1. Purpose of Visit / Report", formData.purpose),
+          ...createSection("2. Observations / Findings", formData.observations),
 
           new Paragraph({ text: "3. Issues Identified & Risk Level", bold: true, spacing: { before: 200 } }),
           new Table({
@@ -171,8 +190,7 @@ export function SiteIncidentReportForm() {
             ]
           }),
 
-          new Paragraph({ text: "5. Conclusion", bold: true, spacing: { before: 200 } }),
-          new Paragraph({ text: formData.conclusion }),
+          ...createSection("5. Conclusion", formData.conclusion),
           
           new Paragraph({ text: "", spacing: { before: 400 } }),
           new Table({
@@ -291,10 +309,39 @@ export function SiteIncidentReportForm() {
                 <div className="flex flex-wrap items-end gap-6"><SignaturePad sigPadRef={reviewedBySigRef} title="Signature" /><div className="space-y-2 flex-1 min-w-[150px]"><Label>Date</Label><Input name="reviewedByDate" type="date" value={formData.reviewedByDate} onChange={handleInputChange} /></div></div>
             </div>
         </div>
-        <div className="w-full flex justify-end">
+        <div className="w-full flex justify-end gap-2">
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline"><Share2 className="mr-2 h-4 w-4" /> Share</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Share Document</DialogTitle>
+                  <DialogDescription>
+                    Enter a Power Automate URL to send this document to a workflow.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="powerAutomateUrl">Power Automate URL</Label>
+                        <Input 
+                            id="powerAutomateUrl" 
+                            placeholder="https://prod.azure.com/..." 
+                            value={powerAutomateUrl}
+                            onChange={(e) => setPowerAutomateUrl(e.target.value)}
+                        />
+                    </div>
+                </div>
+                <DialogFooter>
+                  <Button onClick={handleShare}>Send to Power Automate</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
             <Button onClick={handleExport}>Export to Word</Button>
         </div>
       </CardFooter>
     </Card>
   );
 }
+
+    

@@ -9,10 +9,11 @@ import { LogSheetForm } from '@/components/log-sheet-form';
 import { ProjectReportForm } from '@/components/project-report-form';
 import { SiteIncidentReportForm } from '@/components/site-incident-report-form';
 import { Button } from '@/components/ui/button';
-import { HomeIcon, Sheet } from 'lucide-react';
+import { HomeIcon, Sheet, FileText } from 'lucide-react';
 import { HomePage } from '@/components/home-page';
+import { TaxInvoiceForm } from '@/components/tax-invoice-form';
 
-type DocumentType = 'home' | 'leave' | 'log' | 'report' | 'memorandum' | 'incident';
+type DocumentType = 'home' | 'leave' | 'log' | 'report' | 'memorandum' | 'incident' | 'invoice';
 
 const NavButton = ({ active, onClick, children }: { active: boolean, onClick: () => void, children: React.ReactNode }) => (
   <Button
@@ -41,6 +42,8 @@ export default function Home() {
         return <MemorandumForm />;
       case 'incident':
         return <SiteIncidentReportForm />;
+      case 'invoice':
+        return <TaxInvoiceForm />;
       default:
         return <HomePage />;
     }
@@ -56,6 +59,10 @@ export default function Home() {
             Home
           </NavButton>
           <h3 className="px-2 text-xs font-semibold uppercase text-muted-foreground tracking-wider">Documents</h3>
+           <NavButton active={activeDocument === 'invoice'} onClick={() => setActiveDocument('invoice')}>
+            <FileText className="mr-2 h-4 w-4" />
+            Tax Invoice
+          </NavButton>
           <NavButton active={activeDocument === 'leave'} onClick={() => setActiveDocument('leave')}>
              <Sheet className="mr-2 h-4 w-4" />
             Leave Application

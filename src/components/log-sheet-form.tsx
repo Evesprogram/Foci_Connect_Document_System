@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,6 +11,17 @@ import SignatureCanvas from "react-signature-canvas";
 import { Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, WidthType, BorderStyle, HeadingLevel } from "docx";
 import { saveAs } from "file-saver";
 import { Textarea } from "./ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog"
+import { Copy, Share2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const initialRows = Array.from({ length: 7 }, () => ({
   date: "", timeIn: "", timeOut: "", totalHours: "", tasks: "", remarks: "",
@@ -30,6 +41,13 @@ const base64ToArrayBuffer = (base64: string): ArrayBuffer => {
 };
 
 export function LogSheetForm() {
+  const { toast } = useToast();
+  const [currentUrl, setCurrentUrl] = useState('');
+
+  useEffect(() => {
+    setCurrentUrl(window.location.href);
+  }, []);
+
   const [formData, setFormData] = useState({
     monthYear: "",
     projectSite: "",
@@ -59,6 +77,21 @@ export function LogSheetForm() {
     const newRows = [...rows];
     (newRows[index] as any)[name] = value;
     setRows(newRows);
+  };
+  
+  const handleCopy = () => {
+    navigator.clipboard.writeText(currentUrl).then(() => {
+      toast({
+        title: "URL Copied!",
+        description: "You can now share the link with your team.",
+      });
+    }, (err) => {
+      toast({
+        variant: "destructive",
+        title: "Failed to copy",
+        description: "Could not copy URL to clipboard.",
+      });
+    });
   };
 
   const handleExport = async () => {
@@ -223,7 +256,31 @@ export function LogSheetForm() {
               </div>
           </div>
           <div className="w-full flex justify-end gap-2">
-            <Button onClick={handleExport}>Export to Word</Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button>
+                  <Share2 className="mr-2 h-4 w-4" />
+                  Share
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Share Document</DialogTitle>
+                  <DialogDescription>
+                    Anyone with the link can view and fill out this form.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="flex items-center space-x-2">
+                  <Input value={currentUrl} readOnly />
+                  <Button type="button" size="icon" onClick={handleCopy}>
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+                <DialogFooter>
+                  <Button onClick={handleExport}>Export to Word</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
        </CardFooter>
     </Card>

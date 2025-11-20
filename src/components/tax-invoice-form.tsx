@@ -9,12 +9,30 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "./ui/textarea";
 import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, BorderStyle, HeadingLevel, AlignmentType } from "docx";
 import { saveAs } from "file-saver";
-import { PlusCircle, Trash2 } from "lucide-react";
+import { PlusCircle, Trash2, Share2, Copy } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog"
+import { useToast } from "@/hooks/use-toast";
+
 
 const initialLineItem = { description: "", qty: 1, unitPrice: 0 };
 const VAT_RATE = 0.15;
 
 export function TaxInvoiceForm() {
+  const { toast } = useToast();
+  const [currentUrl, setCurrentUrl] = useState('');
+
+  useEffect(() => {
+    setCurrentUrl(window.location.href);
+  }, []);
+  
   const [invoiceNo, setInvoiceNo] = useState("");
   const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().split('T')[0]);
   const [clientName, setClientName] = useState("");
@@ -64,6 +82,21 @@ export function TaxInvoiceForm() {
 
   const formatCurrency = (amount: number) => {
     return amount.toFixed(2);
+  };
+  
+  const handleCopy = () => {
+    navigator.clipboard.writeText(currentUrl).then(() => {
+      toast({
+        title: "URL Copied!",
+        description: "You can now share the link with your team.",
+      });
+    }, (err) => {
+      toast({
+        variant: "destructive",
+        title: "Failed to copy",
+        description: "Could not copy URL to clipboard.",
+      });
+    });
   };
 
   const handleExport = async () => {
@@ -249,7 +282,31 @@ export function TaxInvoiceForm() {
         </div>
       </CardContent>
       <CardFooter className="flex justify-end">
-        <Button onClick={handleExport}>Export to Word</Button>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button>
+              <Share2 className="mr-2 h-4 w-4" />
+              Share
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Share Document</DialogTitle>
+              <DialogDescription>
+                Anyone with the link can view and fill out this form.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex items-center space-x-2">
+              <Input value={currentUrl} readOnly />
+              <Button type="button" size="icon" onClick={handleCopy}>
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
+            <DialogFooter>
+              <Button onClick={handleExport}>Export to Word</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </CardFooter>
     </Card>
   );

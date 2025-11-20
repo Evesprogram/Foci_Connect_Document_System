@@ -31,13 +31,8 @@ const base64ToArrayBuffer = (base64: string): ArrayBuffer => {
   if (!base64 || base64.indexOf(',') === -1) {
     throw new Error('Invalid base64 string');
   }
-  const binary_string = window.atob(base64.split(",")[1]);
-  const len = binary_string.length;
-  const bytes = new Uint8Array(len);
-  for (let i = 0; i < len; i++) {
-    bytes[i] = binary_string.charCodeAt(i);
-  }
-  return bytes.buffer;
+  const base64Data = base64.split(",")[1];
+  return Buffer.from(base64Data, 'base64').buffer;
 };
 
 export function LogSheetForm() {
@@ -286,5 +281,3 @@ export function LogSheetForm() {
     </Card>
   );
 }
-
-    

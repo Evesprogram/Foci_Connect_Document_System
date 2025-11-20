@@ -1,7 +1,8 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { PageHeader } from '@/components/page-header';
 import { MemorandumForm } from '@/components/memorandum-form';
 import { LeaveApplicationForm } from '@/components/leave-application-form';
@@ -29,7 +30,29 @@ const NavButton = ({ active, onClick, children }: { active: boolean, onClick: ()
 );
 
 export default function Home() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [activeDocument, setActiveDocument] = useState<DocumentType>('home');
+
+  useEffect(() => {
+    const formType = searchParams.get('form') as DocumentType | null;
+    if (formType) {
+      setActiveDocument(formType);
+    } else {
+      setActiveDocument('home');
+    }
+  }, [searchParams]);
+
+  const handleNavClick = (docType: DocumentType) => {
+    setActiveDocument(docType);
+    const params = new URLSearchParams(searchParams.toString());
+    if (docType === 'home') {
+      params.delete('form');
+    } else {
+      params.set('form', docType);
+    }
+    router.push(`?${params.toString()}`);
+  };
 
   const renderActiveDocument = () => {
     switch (activeDocument) {
@@ -63,44 +86,44 @@ export default function Home() {
       <aside className="fixed inset-y-0 left-0 z-10 hidden w-60 flex-col border-r bg-background sm:flex">
         <nav className="flex flex-col gap-4 p-4">
           <h2 className="text-lg font-semibold tracking-tight">FOCI Connect</h2>
-          <NavButton active={activeDocument === 'home'} onClick={() => setActiveDocument('home')}>
+          <NavButton active={activeDocument === 'home'} onClick={() => handleNavClick('home')}>
             <HomeIcon className="mr-2 h-4 w-4" />
             Home
           </NavButton>
           <h3 className="px-2 text-xs font-semibold uppercase text-muted-foreground tracking-wider">Documents</h3>
-           <NavButton active={activeDocument === 'invoice'} onClick={() => setActiveDocument('invoice')}>
+           <NavButton active={activeDocument === 'invoice'} onClick={() => handleNavClick('invoice')}>
             <FileText className="mr-2 h-4 w-4" />
             Tax Invoice
           </NavButton>
-          <NavButton active={activeDocument === 'po'} onClick={() => setActiveDocument('po')}>
+          <NavButton active={activeDocument === 'po'} onClick={() => handleNavClick('po')}>
             <FileText className="mr-2 h-4 w-4" />
             Purchase Order
           </NavButton>
-          <NavButton active={activeDocument === 'acceptance'} onClick={() => setActiveDocument('acceptance')}>
+          <NavButton active={activeDocument === 'acceptance'} onClick={() => handleNavClick('acceptance')}>
             <FilePlus className="mr-2 h-4 w-4" />
             Acceptance Letter
           </NavButton>
-          <NavButton active={activeDocument === 'notice'} onClick={() => setActiveDocument('notice')}>
+          <NavButton active={activeDocument === 'notice'} onClick={() => handleNavClick('notice')}>
             <Megaphone className="mr-2 h-4 w-4" />
             Notice Letter
           </NavButton>
-          <NavButton active={activeDocument === 'leave'} onClick={() => setActiveDocument('leave')}>
+          <NavButton active={activeDocument === 'leave'} onClick={() => handleNavClick('leave')}>
              <Sheet className="mr-2 h-4 w-4" />
             Leave Application
           </NavButton>
-          <NavButton active={activeDocument === 'log'} onClick={() => setActiveDocument('log')}>
+          <NavButton active={activeDocument === 'log'} onClick={() => handleNavClick('log')}>
              <Sheet className="mr-2 h-4 w-4" />
             Log Sheet
           </NavButton>
-          <NavButton active={activeDocument === 'report'} onClick={() => setActiveDocument('report')}>
+          <NavButton active={activeDocument === 'report'} onClick={() => handleNavClick('report')}>
             <Briefcase className="mr-2 h-4 w-4" />
             Month-End Report
           </NavButton>
-           <NavButton active={activeDocument === 'incident'} onClick={() => setActiveDocument('incident')}>
+           <NavButton active={activeDocument === 'incident'} onClick={() => handleNavClick('incident')}>
             <FileText className="mr-2 h-4 w-4" />
             Incident Report
           </NavButton>
-          <NavButton active={activeDocument === 'memorandum'} onClick={() => setActiveDocument('memorandum')}>
+          <NavButton active={activeDocument === 'memorandum'} onClick={() => handleNavClick('memorandum')}>
             <FileText className="mr-2 h-4 w-4" />
             Memorandum
           </NavButton>

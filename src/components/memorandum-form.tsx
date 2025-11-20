@@ -11,9 +11,6 @@ import { SignaturePad } from "@/components/signature-pad";
 import SignatureCanvas from "react-signature-canvas";
 import { Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, WidthType, BorderStyle, HeadingLevel } from "docx";
 import { saveAs } from "file-saver";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
-import { useToast } from "@/hooks/use-toast";
-import { Share2 } from "lucide-react";
 
 const MemoInputRow = ({ label, id, value, onChange }: { label: string; id: string; value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; }) => (
     <div className="grid grid-cols-[80px_1fr] items-center gap-4">
@@ -46,21 +43,11 @@ export function MemorandumForm() {
     signatureDate: "",
   });
 
-  const [powerAutomateUrl, setPowerAutomateUrl] = useState("");
-  const { toast } = useToast();
   const sigPadRef = useRef<SignatureCanvas>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
     setFormData(prev => ({ ...prev, [id]: value }));
-  };
-
-  const handleShare = () => {
-    handleExport();
-    toast({
-      title: "Document Exported",
-      description: "Your document has been downloaded and is ready for sharing.",
-    });
   };
 
   const handleExport = async () => {
@@ -145,33 +132,6 @@ export function MemorandumForm() {
                 </div>
             </div>
             <div className="flex justify-end gap-2">
-                <Dialog>
-                <DialogTrigger asChild>
-                    <Button variant="outline"><Share2 className="mr-2 h-4 w-4" /> Share</Button>
-                </DialogTrigger>
-                <DialogContent>
-                    <DialogHeader>
-                    <DialogTitle>Share Document</DialogTitle>
-                    <DialogDescription>
-                        This will export the document, allowing you to share it manually. Enter a workflow URL below for future integrations.
-                    </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="powerAutomateUrl">Power Automate URL (Optional)</Label>
-                            <Input 
-                                id="powerAutomateUrl" 
-                                placeholder="https://prod.azure.com/..." 
-                                value={powerAutomateUrl}
-                                onChange={(e) => setPowerAutomateUrl(e.target.value)}
-                            />
-                        </div>
-                    </div>
-                    <DialogFooter>
-                    <Button onClick={handleShare}>Download for Sharing</Button>
-                    </DialogFooter>
-                </DialogContent>
-                </Dialog>
                 <Button onClick={handleExport}>Export to Word</Button>
             </div>
        </CardFooter>

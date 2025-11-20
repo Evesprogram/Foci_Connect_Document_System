@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import dynamic from 'next/dynamic';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,7 +11,6 @@ import { Textarea } from "./ui/textarea";
 import { Document, Packer, Paragraph, TextRun, ImageRun, AlignmentType, Table, TableRow, TableCell, WidthType, BorderStyle } from "docx";
 import { saveAs } from "file-saver";
 import SignatureCanvas from "react-signature-canvas";
-import { SignaturePad } from "./signature-pad";
 import {
   Dialog,
   DialogContent,
@@ -22,6 +22,9 @@ import {
 } from "@/components/ui/dialog"
 import { Copy, Share2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+
+const SignaturePad = dynamic(() => import('./signature-pad').then(mod => mod.SignaturePad), { ssr: false });
+
 
 const base64ToArrayBuffer = (base64: string): ArrayBuffer => {
   if (!base64 || base64.indexOf(',') === -1) {
@@ -278,3 +281,5 @@ export function NoticeLetterForm() {
     </Card>
   );
 }
+
+    

@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import dynamic from 'next/dynamic';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,7 +11,6 @@ import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, Width
 import { saveAs } from "file-saver";
 import { PlusCircle, Trash2, Share2, Copy } from "lucide-react";
 import SignatureCanvas from "react-signature-canvas";
-import { SignaturePad } from "./signature-pad";
 import {
   Dialog,
   DialogContent,
@@ -21,6 +21,9 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast";
+
+const SignaturePad = dynamic(() => import('./signature-pad').then(mod => mod.SignaturePad), { ssr: false });
+
 
 const initialLineItem = { description: "", qty: 1, unitPrice: 0 };
 const VAT_RATE = 0.15;
@@ -324,3 +327,5 @@ export function PurchaseOrderForm() {
     </Card>
   );
 }
+
+    

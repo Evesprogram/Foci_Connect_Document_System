@@ -9,8 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "./ui/textarea";
 import { Document, Packer, Paragraph, Table, TableRow, TableCell, WidthType, BorderStyle, HeadingLevel, AlignmentType } from "docx";
 import { saveAs } from "file-saver";
-import { jsPDF } from "jspdf";
-import "jspdf-autotable";
 import { PlusCircle, Trash2, Share2, Copy } from "lucide-react";
 import {
   Dialog,
@@ -196,7 +194,10 @@ export function TaxInvoiceForm() {
     saveAs(blob, `Invoice-${invoiceNo}.docx`);
   };
 
-  const handleExportToPdf = () => {
+  const handleExportToPdf = async () => {
+    const { jsPDF } = await import('jspdf');
+    const autoTable = (await import('jspdf-autotable')).default;
+
     const doc = new jsPDF();
     
     // Add header
@@ -224,7 +225,7 @@ export function TaxInvoiceForm() {
 
     doc.setFont("helvetica", "bold");
     doc.text("Ship To:", 110, 60);
-    docsetFont("helvetica", "normal");
+    doc.setFont("helvetica", "normal");
     const siteAddressLines = doc.splitTextToSize(siteAddress, 80);
     doc.text(siteAddressLines, 110, 65);
 
@@ -243,7 +244,7 @@ export function TaxInvoiceForm() {
       tableRows.push(lineItemData);
     });
 
-    (doc as any).autoTable({
+    autoTable(doc, {
         head: [tableColumn],
         body: tableRows,
         startY: lastY + 15 > 90 ? lastY + 15 : 90,

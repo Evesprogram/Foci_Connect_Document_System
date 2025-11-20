@@ -30,9 +30,11 @@ export function SignaturePad({ sigPadRef, title = "Signature" }: SignaturePadPro
           }}
         />
       </div>
-      <Button variant="outline" size="sm" onClick={clearSignature} className="mt-1">
+      <Button type="button" variant="outline" size="sm" onClick={clearSignature} className="mt-1">
         Clear Signature
       </Button>
     </div>
   );
 }
+
+    

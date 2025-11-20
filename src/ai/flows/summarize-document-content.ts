@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A document summarization AI agent.
@@ -40,8 +41,14 @@ const summarizeDocumentContentFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    // Add a short progress message to the output.
-    output!.progress = 'Generated a short summary of the document content.';
-    return output!;
+    if (output) {
+      output.progress = 'Generated a short summary of the document content.';
+      return output;
+    }
+    // If output is null, return a default or error state.
+    return {
+      summary: 'Could not generate a summary.',
+      progress: 'Failed to generate summary.',
+    };
   }
 );

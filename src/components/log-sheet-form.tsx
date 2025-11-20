@@ -2,11 +2,11 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
+import dynamic from 'next/dynamic';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { SignaturePad } from "@/components/signature-pad";
 import SignatureCanvas from "react-signature-canvas";
 import { Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, WidthType, BorderStyle, HeadingLevel } from "docx";
 import { saveAs } from "file-saver";
@@ -22,6 +22,9 @@ import {
 } from "@/components/ui/dialog"
 import { Copy, Share2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+
+const SignaturePad = dynamic(() => import('./signature-pad').then(mod => mod.SignaturePad), { ssr: false });
+
 
 const initialRows = Array.from({ length: 7 }, () => ({
   date: "", timeIn: "", timeOut: "", totalHours: "", tasks: "", remarks: "",
@@ -281,3 +284,5 @@ export function LogSheetForm() {
     </Card>
   );
 }
+
+    

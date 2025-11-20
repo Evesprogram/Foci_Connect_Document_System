@@ -11,6 +11,9 @@ import SignatureCanvas from "react-signature-canvas";
 import { Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, WidthType, BorderStyle, HeadingLevel } from "docx";
 import { saveAs } from "file-saver";
 import { Textarea } from "./ui/textarea";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { useToast } from "@/hooks/use-toast";
+import { Share2 } from "lucide-react";
 
 const initialRows = Array.from({ length: 7 }, () => ({
   date: "", timeIn: "", timeOut: "", totalHours: "", tasks: "", remarks: "",
@@ -42,6 +45,8 @@ export function LogSheetForm() {
     supervisorComments: "",
   });
   const [rows, setRows] = useState(initialRows);
+  const [powerAutomateUrl, setPowerAutomateUrl] = useState("");
+  const { toast } = useToast();
 
   const employeeSigRef = useRef<SignatureCanvas>(null);
   const supervisorSigRef = useRef<SignatureCanvas>(null);
@@ -56,6 +61,15 @@ export function LogSheetForm() {
     const newRows = [...rows];
     (newRows[index] as any)[name] = value;
     setRows(newRows);
+  };
+
+  const handleShare = () => {
+    // In a real implementation, you would post the document data to this URL.
+    console.log("Sending to Power Automate URL:", powerAutomateUrl);
+    toast({
+      title: "Sent to Workflow",
+      description: "The document has been sent to the Power Automate flow.",
+    });
   };
 
   const handleExport = async () => {
@@ -222,10 +236,39 @@ export function LogSheetForm() {
                 <Textarea id="supervisorComments" name="supervisorComments" value={formData.supervisorComments} onChange={handleInputChange} />
               </div>
           </div>
-          <div className="w-full flex justify-end">
+          <div className="w-full flex justify-end gap-2">
+             <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline"><Share2 className="mr-2 h-4 w-4" /> Share</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Share Document</DialogTitle>
+                  <DialogDescription>
+                    Enter a Power Automate URL to send this document to a workflow.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="powerAutomateUrl">Power Automate URL</Label>
+                        <Input 
+                            id="powerAutomateUrl" 
+                            placeholder="https://prod.azure.com/..." 
+                            value={powerAutomateUrl}
+                            onChange={(e) => setPowerAutomateUrl(e.target.value)}
+                        />
+                    </div>
+                </div>
+                <DialogFooter>
+                  <Button onClick={handleShare}>Send to Power Automate</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
             <Button onClick={handleExport}>Export to Word</Button>
           </div>
        </CardFooter>
     </Card>
   );
 }
+
+    

@@ -7,8 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "./ui/textarea";
-import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, BorderStyle, HeadingLevel, AlignmentType } from "docx";
+import { Document, Packer, Paragraph, Table, TableRow, TableCell, WidthType, BorderStyle, HeadingLevel, AlignmentType } from "docx";
 import { saveAs } from "file-saver";
+import { jsPDF } from "jspdf";
+import "jspdf-autotable";
 import { PlusCircle, Trash2, Share2, Copy } from "lucide-react";
 import {
   Dialog,
@@ -99,7 +101,7 @@ export function TaxInvoiceForm() {
     });
   };
 
-  const handleExport = async () => {
+  const handleExportToWord = async () => {
     const doc = new Document({
       sections: [{
         children: [
@@ -194,6 +196,83 @@ export function TaxInvoiceForm() {
     saveAs(blob, `Invoice-${invoiceNo}.docx`);
   };
 
+  const handleExportToPdf = () => {
+    const doc = new jsPDF();
+    
+    // Add header
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text("FOCI GROUP (Pty) Ltd", doc.internal.pageSize.getWidth() / 2, 20, { align: "center" });
+    doc.setFontSize(20);
+    doc.text("TAX INVOICE", doc.internal.pageSize.getWidth() / 2, 30, { align: "center" });
+
+    // Invoice Info
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Invoice No: ${invoiceNo}`, 20, 45);
+    doc.text(`Date: ${invoiceDate}`, doc.internal.pageSize.getWidth() - 20, 45, { align: "right" });
+
+    // Addresses
+    doc.setFont("helvetica", "bold");
+    doc.text("Bill To:", 20, 60);
+    doc.setFont("helvetica", "normal");
+    doc.text(clientName, 20, 65);
+    const clientAddressLines = doc.splitTextToSize(clientAddress, 80);
+    doc.text(clientAddressLines, 20, 70);
+    let lastY = 70 + (clientAddressLines.length * 5);
+    doc.text(`VAT No: ${clientVat}`, 20, lastY + 5);
+
+    doc.setFont("helvetica", "bold");
+    doc.text("Ship To:", 110, 60);
+    docsetFont("helvetica", "normal");
+    const siteAddressLines = doc.splitTextToSize(siteAddress, 80);
+    doc.text(siteAddressLines, 110, 65);
+
+    // Line items table
+    const tableColumn = ["Item", "Description", "Qty", "Unit Price", "Line Total"];
+    const tableRows: (string|number)[][] = [];
+
+    lineItems.forEach((item, index) => {
+      const lineItemData = [
+        index + 1,
+        item.description,
+        item.qty,
+        `R ${formatCurrency(item.unitPrice)}`,
+        `R ${formatCurrency(item.qty * item.unitPrice)}`
+      ];
+      tableRows.push(lineItemData);
+    });
+
+    (doc as any).autoTable({
+        head: [tableColumn],
+        body: tableRows,
+        startY: lastY + 15 > 90 ? lastY + 15 : 90,
+    });
+    
+    let finalY = (doc as any).lastAutoTable.finalY;
+
+    // Totals
+    doc.setFontSize(10);
+    const totalX = doc.internal.pageSize.getWidth() - 20;
+    doc.text("Subtotal:", totalX - 30, finalY + 10, { align: "right" });
+    doc.text(`R ${formatCurrency(subtotal)}`, totalX, finalY + 10, { align: "right" });
+    doc.text("VAT (15%):", totalX - 30, finalY + 15, { align: "right" });
+    doc.text(`R ${formatCurrency(vat)}`, totalX, finalY + 15, { align: "right" });
+    doc.setFont("helvetica", "bold");
+    doc.text("TOTAL AMOUNT DUE:", totalX - 30, finalY + 20, { align: "right" });
+    doc.text(`R ${formatCurrency(total)}`, totalX, finalY + 20, { align: "right" });
+
+    finalY += 30;
+
+    // Footer
+    doc.setFont("helvetica", "bold");
+    doc.text(`Bank Details: FNB | Acc: 628 495 821 33 | Branch: 25-01-55 | Ref: ${invoiceNo}`, 20, finalY + 10);
+    doc.setFont("helvetica", "italic");
+    doc.text("Terms: Payment within 30 days of invoice date.", 20, finalY + 15);
+
+    doc.save(`Invoice-${invoiceNo}.pdf`);
+  };
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -281,7 +360,8 @@ export function TaxInvoiceForm() {
           </div>
         </div>
       </CardContent>
-      <CardFooter className="flex justify-end">
+      <CardFooter className="flex justify-end gap-2">
+        <Button onClick={handleExportToPdf} variant="outline">Export to PDF</Button>
         <Dialog>
           <DialogTrigger asChild>
             <Button>
@@ -303,7 +383,7 @@ export function TaxInvoiceForm() {
               </Button>
             </div>
             <DialogFooter>
-              <Button onClick={handleExport}>Export to Word</Button>
+              <Button onClick={handleExportToWord}>Export to Word</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -311,3 +391,5 @@ export function TaxInvoiceForm() {
     </Card>
   );
 }
+
+    

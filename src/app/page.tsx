@@ -12,8 +12,9 @@ import { Button } from '@/components/ui/button';
 import { HomeIcon, Sheet, FileText } from 'lucide-react';
 import { HomePage } from '@/components/home-page';
 import { TaxInvoiceForm } from '@/components/tax-invoice-form';
+import { PurchaseOrderForm } from '@/components/purchase-order-form';
 
-type DocumentType = 'home' | 'leave' | 'log' | 'report' | 'memorandum' | 'incident' | 'invoice';
+type DocumentType = 'home' | 'leave' | 'log' | 'report' | 'memorandum' | 'incident' | 'invoice' | 'po';
 
 const NavButton = ({ active, onClick, children }: { active: boolean, onClick: () => void, children: React.ReactNode }) => (
   <Button
@@ -44,6 +45,8 @@ export default function Home() {
         return <SiteIncidentReportForm />;
       case 'invoice':
         return <TaxInvoiceForm />;
+      case 'po':
+        return <PurchaseOrderForm />;
       default:
         return <HomePage />;
     }
@@ -63,6 +66,10 @@ export default function Home() {
             <FileText className="mr-2 h-4 w-4" />
             Tax Invoice
           </NavButton>
+          <NavButton active={activeDocument === 'po'} onClick={() => setActiveDocument('po')}>
+            <FileText className="mr-2 h-4 w-4" />
+            Purchase Order
+          </NavButton>
           <NavButton active={activeDocument === 'leave'} onClick={() => setActiveDocument('leave')}>
              <Sheet className="mr-2 h-4 w-4" />
             Leave Application
@@ -76,11 +83,11 @@ export default function Home() {
             Project Report
           </NavButton>
            <NavButton active={activeDocument === 'incident'} onClick={() => setActiveDocument('incident')}>
-            <Sheet className="mr-2 h-4 w-4" />
+            <FileText className="mr-2 h-4 w-4" />
             Incident Report
           </NavButton>
           <NavButton active={activeDocument === 'memorandum'} onClick={() => setActiveDocument('memorandum')}>
-            <Sheet className="mr-2 h-4 w-4" />
+            <FileText className="mr-2 h-4 w-4" />
             Memorandum
           </NavButton>
         </nav>

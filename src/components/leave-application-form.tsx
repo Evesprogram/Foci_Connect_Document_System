@@ -62,9 +62,9 @@ export function LeaveApplicationForm() {
     hrSignatureDate: "",
   });
 
-  const employeeSigRef = useRef<import("react-signature-canvas").default>(null);
-  const supervisorSigRef = useRef<import("react-signature-canvas").default>(null);
-  const hrSigRef = useRef<import("react-signature-canvas").default>(null);
+  const employeeSigRef = useRef<import("react-signature-canvas")>(null);
+  const supervisorSigRef = useRef<import("react-signature-canvas")>(null);
+  const hrSigRef = useRef<import("react-signature-canvas")>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -91,7 +91,7 @@ export function LeaveApplicationForm() {
   };
 
   const handleExport = async () => {
-    const getSignatureImage = (ref: React.RefObject<import("react-signature-canvas").default>) => {
+    const getSignatureImage = (ref: React.RefObject<import("react-signature-canvas")>) => {
       if (ref.current && !ref.current.isEmpty()) {
         const dataUrl = ref.current.getTrimmedCanvas().toDataURL("image/png");
         return base64ToArrayBuffer(dataUrl);

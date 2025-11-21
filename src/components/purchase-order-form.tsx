@@ -50,16 +50,16 @@ export function PurchaseOrderForm() {
   const [totalIncl, setTotalIncl] = useState(0);
   const [authorisedBy, setAuthorisedBy] = useState("");
 
-  const authSigRef = useRef<import("react-signature-canvas").default>(null);
+  const authSigRef = useRef<import("react-signature-canvas")>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setCurrentUrl(window.location.href);
+      const year = new Date().getFullYear();
+      const uniqueNum = Math.floor(1000 + Math.random() * 9000);
+      setOrderNo(`PO-FOC-${year}-${uniqueNum}`);
+      setOrderDate(new Date().toISOString().split('T')[0]);
     }
-    const year = new Date().getFullYear();
-    const uniqueNum = Math.floor(1000 + Math.random() * 9000);
-    setOrderNo(`PO-FOC-${year}-${uniqueNum}`);
-    setOrderDate(new Date().toISOString().split('T')[0]);
   }, []);
 
   useEffect(() => {

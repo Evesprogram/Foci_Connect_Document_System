@@ -51,20 +51,20 @@ export function NoticeLetterForm() {
     hrManagerSignatureDate: ""
   });
 
-  const employeeSigRef = useRef<import("react-signature-canvas").default>(null);
-  const hrManagerSigRef = useRef<import("react-signature-canvas").default>(null);
+  const employeeSigRef = useRef<import("react-signature-canvas")>(null);
+  const hrManagerSigRef = useRef<import("react-signature-canvas")>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setCurrentUrl(window.location.href);
+      const year = new Date().getFullYear();
+      const uniqueNum = Math.floor(1000 + Math.random() * 9000);
+      setFormData(prev => ({
+          ...prev, 
+          refNo: `NOTICE-${year}-${uniqueNum}`,
+          date: new Date().toISOString().split('T')[0]
+      }));
     }
-    const year = new Date().getFullYear();
-    const uniqueNum = Math.floor(1000 + Math.random() * 9000);
-    setFormData(prev => ({
-        ...prev, 
-        refNo: `NOTICE-${year}-${uniqueNum}`,
-        date: new Date().toISOString().split('T')[0]
-    }));
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -88,7 +88,7 @@ export function NoticeLetterForm() {
   };
 
   const handleExport = async () => {
-    const getSignatureImage = (ref: React.RefObject<import("react-signature-canvas").default>) => {
+    const getSignatureImage = (ref: React.RefObject<import("react-signature-canvas")>) => {
       if (ref.current && !ref.current.isEmpty()) {
         const dataUrl = ref.current.getTrimmedCanvas().toDataURL("image/png");
         return base64ToArrayBuffer(dataUrl);

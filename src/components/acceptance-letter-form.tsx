@@ -51,20 +51,20 @@ export function AcceptanceLetterForm() {
     authorisedSignatory: "",
   });
 
-  const signatorySigRef = useRef<import("react-signature-canvas").default>(null);
-  const directorSigRef = useRef<import("react-signature-canvas").default>(null);
+  const signatorySigRef = useRef<import("react-signature-canvas")>(null);
+  const directorSigRef = useRef<import("react-signature-canvas")>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setCurrentUrl(window.location.href);
+      const year = new Date().getFullYear();
+      const uniqueNum = Math.floor(1000 + Math.random() * 9000);
+      setFormData(prev => ({
+          ...prev, 
+          refNo: `ACCEPT-${year}-${uniqueNum}`,
+          date: new Date().toISOString().split('T')[0]
+      }));
     }
-    const year = new Date().getFullYear();
-    const uniqueNum = Math.floor(1000 + Math.random() * 9000);
-    setFormData(prev => ({
-        ...prev, 
-        refNo: `ACCEPT-${year}-${uniqueNum}`,
-        date: new Date().toISOString().split('T')[0]
-    }));
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {

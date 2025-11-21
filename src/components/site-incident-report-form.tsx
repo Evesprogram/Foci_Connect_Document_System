@@ -71,8 +71,8 @@ export function SiteIncidentReportForm() {
   const [issues, setIssues] = useState([initialIssueRow]);
   const [actions, setActions] = useState([initialActionRow]);
 
-  const preparedBySigRef = useRef<import("react-signature-canvas").default>(null);
-  const reviewedBySigRef = useRef<import("react-signature-canvas").default>(null);
+  const preparedBySigRef = useRef<import("react-signature-canvas")>(null);
+  const reviewedBySigRef = useRef<import("react-signature-canvas")>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -110,7 +110,7 @@ export function SiteIncidentReportForm() {
   };
 
   const handleExport = async () => {
-    const getSignatureImage = (ref: React.RefObject<import("react-signature-canvas").default>) => {
+    const getSignatureImage = (ref: React.RefObject<import("react-signature-canvas")>) => {
       if (ref.current && !ref.current.isEmpty()) {
         const dataUrl = ref.current.getTrimmedCanvas().toDataURL("image/png");
         return base64ToArrayBuffer(dataUrl);

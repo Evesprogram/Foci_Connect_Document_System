@@ -40,12 +40,17 @@ const summarizeDocumentContentFlow = ai.defineFlow(
     outputSchema: SummarizeDocumentContentOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
-    if (output) {
-      output.progress = 'Generated a short summary of the document content.';
-      return output;
+    try {
+      const {output} = await prompt(input);
+      if (output) {
+        output.progress = 'Generated a short summary of the document content.';
+        return output;
+      }
+    } catch (e) {
+      console.error("Error in summarizeDocumentContentFlow:", e);
     }
-    // If output is null, return a default or error state.
+    
+    // If output is null or an error occurred, return a default or error state.
     return {
       summary: 'Could not generate a summary.',
       progress: 'Failed to generate summary.',

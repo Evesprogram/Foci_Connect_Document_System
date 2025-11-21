@@ -61,7 +61,7 @@ export function MemorandumForm() {
     signatureDate: "",
   });
 
-  const sigPadRef = useRef<import("react-signature-canvas").default>(null);
+  const sigPadRef = useRef<import("react-signature-canvas")>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;

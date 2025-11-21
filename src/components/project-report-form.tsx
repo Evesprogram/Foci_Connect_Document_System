@@ -55,22 +55,22 @@ export function ProjectReportForm() {
     approvedByDate: "",
   });
 
-  const approvedBySigRef = useRef<import("react-signature-canvas").default>(null);
+  const approvedBySigRef = useRef<import("react-signature-canvas")>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setCurrentUrl(window.location.href);
+      const currentDate = new Date();
+      const year = currentDate.getFullYear();
+      const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+      const uniqueNum = Math.floor(1000 + Math.random() * 9000);
+      setFormData(prev => ({
+          ...prev, 
+          reportNo: `MER-${year}${month}-${uniqueNum}`,
+          month: currentDate.toLocaleString('default', { month: 'long' }),
+          year: year.toString(),
+      }));
     }
-    const currentDate = new Date();
-    const year = currentDate.getFullYear();
-    const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
-    const uniqueNum = Math.floor(1000 + Math.random() * 9000);
-    setFormData(prev => ({
-        ...prev, 
-        reportNo: `MER-${year}${month}-${uniqueNum}`,
-        month: currentDate.toLocaleString('default', { month: 'long' }),
-        year: year.toString(),
-    }));
   }, []);
   
   useEffect(() => {

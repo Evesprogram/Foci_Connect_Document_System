@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "./ui/textarea";
 import { Document, Packer, Paragraph, TextRun, ImageRun, AlignmentType, Table, TableRow, TableCell, WidthType } from "docx";
 import { saveAs } from "file-saver";
-import SignatureCanvas from "react-signature-canvas";
 import {
   Dialog,
   DialogContent,
@@ -24,6 +23,7 @@ import { Copy, Share2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const SignaturePad = dynamic(() => import('./signature-pad').then(mod => mod.SignaturePad), { ssr: false });
+const SignatureCanvas = dynamic(() => import('react-signature-canvas'), { ssr: false });
 
 
 const base64ToArrayBuffer = (base64: string): ArrayBuffer => {
@@ -33,13 +33,6 @@ const base64ToArrayBuffer = (base64: string): ArrayBuffer => {
 export function AcceptanceLetterForm() {
   const { toast } = useToast();
   const [currentUrl, setCurrentUrl] = useState('');
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setCurrentUrl(window.location.href);
-    }
-  }, []);
-
   const [formData, setFormData] = useState({
     refNo: "",
     date: "",
@@ -54,17 +47,20 @@ export function AcceptanceLetterForm() {
     authorisedSignatory: "",
   });
 
-  const signatorySigRef = useRef<SignatureCanvas>(null);
-  const directorSigRef = useRef<SignatureCanvas>(null);
+  const signatorySigRef = useRef<import("react-signature-canvas").default>(null);
+  const directorSigRef = useRef<import("react-signature-canvas").default>(null);
 
   useEffect(() => {
-    const year = new Date().getFullYear();
-    const uniqueNum = Math.floor(1000 + Math.random() * 9000);
-    setFormData(prev => ({
-        ...prev, 
-        refNo: `ACCEPT-${year}-${uniqueNum}`,
-        date: new Date().toISOString().split('T')[0]
-    }));
+    if (typeof window !== 'undefined') {
+      setCurrentUrl(window.location.href);
+      const year = new Date().getFullYear();
+      const uniqueNum = Math.floor(1000 + Math.random() * 9000);
+      setFormData(prev => ({
+          ...prev, 
+          refNo: `ACCEPT-${year}-${uniqueNum}`,
+          date: new Date().toISOString().split('T')[0]
+      }));
+    }
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -107,40 +103,40 @@ export function AcceptanceLetterForm() {
       sections: [{
         children: [
           new Paragraph({ children: [new TextRun({ text: "FOCI GROUP (Pty) Ltd", bold: true })], alignment: AlignmentType.CENTER }),
-          new Paragraph(""),
+          new Paragraph({text: ""}),
           new Paragraph({ text: `Ref: ${formData.refNo}`, alignment: AlignmentType.LEFT }),
           new Paragraph({ text: `Date: ${formData.date}`, alignment: AlignmentType.LEFT }),
-          new Paragraph(""),
-          new Paragraph(formData.clientName),
-          ...formData.clientAddress.split('\n').map(p => new Paragraph(p)),
-          new Paragraph(""),
-          new Paragraph(`Dear ${formData.contactPerson},`),
-          new Paragraph(""),
+          new Paragraph({text: ""}),
+          new Paragraph({text: formData.clientName}),
+          ...formData.clientAddress.split('\n').map(p => new Paragraph({text: p})),
+          new Paragraph({text: ""}),
+          new Paragraph({text: `Dear ${formData.contactPerson},`}),
+          new Paragraph({text: ""}),
           new Paragraph({ 
             children: [
               new TextRun({ text: "SUBJECT: ACCEPTANCE OF CONTRACT / TENDER AWARD – ", bold: true, underline: {} }),
               new TextRun({ text: formData.projectName, bold: true, underline: {} }),
             ]
           }),
-          new Paragraph(""),
+          new Paragraph({text: ""}),
           new Paragraph({
             children: [
-              new TextRun("We are pleased to accept the award of the above contract dated "),
+              new TextRun({text: "We are pleased to accept the award of the above contract dated "}),
               new TextRun({ text: formData.awardDate }),
-              new TextRun(" for the amount of R"),
+              new TextRun({text: " for the amount of R"}),
               new TextRun({ text: formData.amount }),
-              new TextRun(" (excl. VAT)."),
+              new TextRun({text: " (excl. VAT)."}),
             ]
           }),
-          new Paragraph(""),
-          new Paragraph(`We confirm commencement date: ${formData.startDate}`),
-          new Paragraph(`Expected completion date:     ${formData.endDate}`),
-          new Paragraph(""),
-          new Paragraph("Thank you for the opportunity."),
-          new Paragraph(""),
-          new Paragraph("Yours sincerely,"),
-          new Paragraph(""),
-          new Paragraph(""),
+          new Paragraph({text: ""}),
+          new Paragraph({text: `We confirm commencement date: ${formData.startDate}`}),
+          new Paragraph({text: `Expected completion date:     ${formData.endDate}`}),
+          new Paragraph({text: ""}),
+          new Paragraph({text: "Thank you for the opportunity."}),
+          new Paragraph({text: ""}),
+          new Paragraph({text: "Yours sincerely,"}),
+          new Paragraph({text: ""}),
+          new Paragraph({text: ""}),
 
           new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
@@ -152,15 +148,15 @@ export function AcceptanceLetterForm() {
                             children: [
                                 new Paragraph({ children: [new ImageRun({ data: signatorySigBuffer, transformation: { width: 150, height: 40 } })] }),
                                 new Paragraph({ children: [ new TextRun({ text: "_______________________" }) ] }),
-                                new Paragraph(formData.authorisedSignatory),
-                                new Paragraph("FOCI GROUP (Pty) Ltd"),
+                                new Paragraph({text: formData.authorisedSignatory}),
+                                new Paragraph({text: "FOCI GROUP (Pty) Ltd"}),
                             ],
                         }),
                         new TableCell({
                              children: [
                                 new Paragraph({ children: [new ImageRun({ data: directorSigBuffer, transformation: { width: 150, height: 40 } })] }),
                                 new Paragraph({ children: [ new TextRun({ text: "_______________________" }) ] }),
-                                new Paragraph("Director"),
+                                new Paragraph({text: "Director"}),
                             ],
                         }),
                     ],

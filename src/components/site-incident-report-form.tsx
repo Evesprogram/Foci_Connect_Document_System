@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import SignatureCanvas from "react-signature-canvas";
 import { Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, WidthType, BorderStyle, HeadingLevel, AlignmentType } from "docx";
 import { saveAs } from "file-saver";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
@@ -25,6 +24,7 @@ import { Copy, Share2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const SignaturePad = dynamic(() => import('./signature-pad').then(mod => mod.SignaturePad), { ssr: false });
+const SignatureCanvas = dynamic(() => import('react-signature-canvas'), { ssr: false });
 
 
 const base64ToArrayBuffer = (base64: string): ArrayBuffer => {
@@ -67,8 +67,8 @@ export function SiteIncidentReportForm() {
   const [issues, setIssues] = useState([initialIssueRow]);
   const [actions, setActions] = useState([initialActionRow]);
 
-  const preparedBySigRef = useRef<SignatureCanvas>(null);
-  const reviewedBySigRef = useRef<SignatureCanvas>(null);
+  const preparedBySigRef = useRef<import("react-signature-canvas").default>(null);
+  const reviewedBySigRef = useRef<import("react-signature-canvas").default>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -106,7 +106,7 @@ export function SiteIncidentReportForm() {
   };
 
   const handleExport = async () => {
-    const getSignatureImage = (ref: React.RefObject<SignatureCanvas>) => {
+    const getSignatureImage = (ref: React.RefObject<import("react-signature-canvas").default>) => {
       if (ref.current && !ref.current.isEmpty()) {
         const dataUrl = ref.current.getTrimmedCanvas().toDataURL("image/png");
         return base64ToArrayBuffer(dataUrl);
@@ -355,5 +355,3 @@ export function SiteIncidentReportForm() {
     </Card>
   );
 }
-
-    

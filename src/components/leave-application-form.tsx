@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import SignatureCanvas from "react-signature-canvas";
 import { Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, WidthType, BorderStyle, HeadingLevel, AlignmentType } from "docx";
 import { saveAs } from "file-saver";
 import { Textarea } from "./ui/textarea";
@@ -25,6 +24,7 @@ import { Copy, Share2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const SignaturePad = dynamic(() => import('./signature-pad').then(mod => mod.SignaturePad), { ssr: false });
+const SignatureCanvas = dynamic(() => import('react-signature-canvas'), { ssr: false });
 
 const base64ToArrayBuffer = (base64: string): ArrayBuffer => {
     return Buffer.from(base64.split(",")[1], 'base64');
@@ -57,9 +57,9 @@ export function LeaveApplicationForm() {
     hrSignatureDate: "",
   });
 
-  const employeeSigRef = useRef<SignatureCanvas>(null);
-  const supervisorSigRef = useRef<SignatureCanvas>(null);
-  const hrSigRef = useRef<SignatureCanvas>(null);
+  const employeeSigRef = useRef<import("react-signature-canvas").default>(null);
+  const supervisorSigRef = useRef<import("react-signature-canvas").default>(null);
+  const hrSigRef = useRef<import("react-signature-canvas").default>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -86,7 +86,7 @@ export function LeaveApplicationForm() {
   };
 
   const handleExport = async () => {
-    const getSignatureImage = (ref: React.RefObject<SignatureCanvas>) => {
+    const getSignatureImage = (ref: React.RefObject<import("react-signature-canvas").default>) => {
       if (ref.current && !ref.current.isEmpty()) {
         const dataUrl = ref.current.getTrimmedCanvas().toDataURL("image/png");
         return base64ToArrayBuffer(dataUrl);
@@ -289,5 +289,3 @@ export function LeaveApplicationForm() {
     </Card>
   );
 }
-
-    

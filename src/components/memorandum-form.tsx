@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import SignatureCanvas from "react-signature-canvas";
 import { Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, WidthType, BorderStyle, HeadingLevel, AlignmentType } from "docx";
 import { saveAs } from "file-saver";
 import {
@@ -24,6 +23,7 @@ import { Copy, Share2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const SignaturePad = dynamic(() => import('./signature-pad').then(mod => mod.SignaturePad), { ssr: false });
+const SignatureCanvas = dynamic(() => import('react-signature-canvas'), { ssr: false });
 
 
 const MemoInputRow = ({ label, id, value, onChange }: { label: string; id: string; value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; }) => (
@@ -57,7 +57,7 @@ export function MemorandumForm() {
     signatureDate: "",
   });
 
-  const sigPadRef = useRef<SignatureCanvas>(null);
+  const sigPadRef = useRef<import("react-signature-canvas").default>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
@@ -191,5 +191,3 @@ export function MemorandumForm() {
     </Card>
   );
 }
-
-    

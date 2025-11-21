@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "./ui/textarea";
 import { Document, Packer, Paragraph, TextRun, ImageRun, AlignmentType, Table, TableRow, TableCell, WidthType, BorderStyle } from "docx";
 import { saveAs } from "file-saver";
-import SignatureCanvas from "react-signature-canvas";
 import {
   Dialog,
   DialogContent,
@@ -24,6 +23,7 @@ import { Copy, Share2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const SignaturePad = dynamic(() => import('./signature-pad').then(mod => mod.SignaturePad), { ssr: false });
+const SignatureCanvas = dynamic(() => import('react-signature-canvas'), { ssr: false });
 
 
 const base64ToArrayBuffer = (base64: string): ArrayBuffer => {
@@ -33,13 +33,6 @@ const base64ToArrayBuffer = (base64: string): ArrayBuffer => {
 export function NoticeLetterForm() {
   const { toast } = useToast();
   const [currentUrl, setCurrentUrl] = useState('');
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setCurrentUrl(window.location.href);
-    }
-  }, []);
-
   const [formData, setFormData] = useState({
     refNo: "",
     date: "",
@@ -54,17 +47,20 @@ export function NoticeLetterForm() {
     hrManagerSignatureDate: ""
   });
 
-  const employeeSigRef = useRef<SignatureCanvas>(null);
-  const hrManagerSigRef = useRef<SignatureCanvas>(null);
+  const employeeSigRef = useRef<import("react-signature-canvas").default>(null);
+  const hrManagerSigRef = useRef<import("react-signature-canvas").default>(null);
 
   useEffect(() => {
-    const year = new Date().getFullYear();
-    const uniqueNum = Math.floor(1000 + Math.random() * 9000);
-    setFormData(prev => ({
-        ...prev, 
-        refNo: `NOTICE-${year}-${uniqueNum}`,
-        date: new Date().toISOString().split('T')[0]
-    }));
+    if (typeof window !== 'undefined') {
+      setCurrentUrl(window.location.href);
+      const year = new Date().getFullYear();
+      const uniqueNum = Math.floor(1000 + Math.random() * 9000);
+      setFormData(prev => ({
+          ...prev, 
+          refNo: `NOTICE-${year}-${uniqueNum}`,
+          date: new Date().toISOString().split('T')[0]
+      }));
+    }
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -88,7 +84,7 @@ export function NoticeLetterForm() {
   };
 
   const handleExport = async () => {
-    const getSignatureImage = (ref: React.RefObject<SignatureCanvas>) => {
+    const getSignatureImage = (ref: React.RefObject<import("react-signature-canvas").default>) => {
       if (ref.current && !ref.current.isEmpty()) {
         const dataUrl = ref.current.getTrimmedCanvas().toDataURL("image/png");
         return base64ToArrayBuffer(dataUrl);
@@ -112,35 +108,35 @@ export function NoticeLetterForm() {
       sections: [{
         children: [
           new Paragraph({ children: [new TextRun({ text: "FOCI GROUP (Pty) Ltd", bold: true })], alignment: AlignmentType.CENTER }),
-          new Paragraph(""),
+          new Paragraph({text: ""}),
           new Paragraph({ text: "NOTICE LETTER", heading: "Title", alignment: AlignmentType.CENTER }),
-          new Paragraph(""),
+          new Paragraph({text: ""}),
           new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
             borders: { top: { style: 'none' }, bottom: { style: 'none' }, left: { style: 'none' }, right: { style: 'none' }, insideHorizontal: { style: 'none' }, insideVertical: { style: 'none' } },
-            rows: [ new TableRow({ children: [ new TableCell({ children: [new Paragraph(`Ref: ${formData.refNo}`)] }), new TableCell({ children: [new Paragraph({ text: `Date: ${formData.date}`, alignment: AlignmentType.RIGHT })] }) ] }) ]
+            rows: [ new TableRow({ children: [ new TableCell({ children: [new Paragraph({text: `Ref: ${formData.refNo}`})] }), new TableCell({ children: [new Paragraph({ text: `Date: ${formData.date}`, alignment: AlignmentType.RIGHT })] }) ] }) ]
           }),
-          new Paragraph(""),
-          new Paragraph(`To: ${formData.employeeName}`),
-          new Paragraph(`Employee ID: ${formData.employeeId}`),
-          new Paragraph(""),
+          new Paragraph({text: ""}),
+          new Paragraph({text: `To: ${formData.employeeName}`}),
+          new Paragraph({text: `Employee ID: ${formData.employeeId}`}),
+          new Paragraph({text: ""}),
           new Paragraph({ 
             children: [
               new TextRun({ text: "Subject: ", bold: true }),
-              new TextRun(`${formData.noticeType} – ${formData.shortDescription}`),
+              new TextRun({text: `${formData.noticeType} – ${formData.shortDescription}`}),
             ],
             spacing: { before: 200, after: 200 }
           }),
-          new Paragraph(`Dear ${formData.employeeName},`),
-          new Paragraph(""),
-          new Paragraph("You are hereby notified of the following:"),
-          new Paragraph(formData.detailedReason),
-          new Paragraph(""),
-          new Paragraph("You are required to:"),
-          new Paragraph(`${formData.actionRequired} by ${formData.deadlineDate}`),
-          new Paragraph(""),
-          new Paragraph("Failure to comply may result in further disciplinary action."),
-          new Paragraph(""),
+          new Paragraph({text: `Dear ${formData.employeeName},`}),
+          new Paragraph({text: ""}),
+          new Paragraph({text: "You are hereby notified of the following:"}),
+          new Paragraph({text: formData.detailedReason}),
+          new Paragraph({text: ""}),
+          new Paragraph({text: "You are required to:"}),
+          new Paragraph({text: `${formData.actionRequired} by ${formData.deadlineDate}`}),
+          new Paragraph({text: ""}),
+          new Paragraph({text: "Failure to comply may result in further disciplinary action."}),
+          new Paragraph({text: ""}),
           new Paragraph({ text: "", spacing: { after: 400 } }),
           
           new Table({
@@ -151,18 +147,18 @@ export function NoticeLetterForm() {
                     children: [
                         new TableCell({
                             children: [
-                                new Paragraph("Acknowledged by Employee:"),
+                                new Paragraph({text: "Acknowledged by Employee:"}),
                                 new Paragraph({ children: [new ImageRun({ data: employeeSigBuffer, transformation: { width: 150, height: 40 } })] }),
                                 new Paragraph({ children: [ new TextRun({ text: "_______________________" }) ] }),
-                                new Paragraph(`Date: ${formData.employeeSignatureDate}`),
+                                new Paragraph({text: `Date: ${formData.employeeSignatureDate}`}),
                             ],
                         }),
                         new TableCell({
                              children: [
-                                new Paragraph("HR Manager:"),
+                                new Paragraph({text: "HR Manager:"}),
                                 new Paragraph({ children: [new ImageRun({ data: hrManagerSigBuffer, transformation: { width: 150, height: 40 } })] }),
                                 new Paragraph({ children: [ new TextRun({ text: "_______________________" }) ] }),
-                                new Paragraph(`Date: ${formData.hrManagerSignatureDate}`),
+                                new Paragraph({text: `Date: ${formData.hrManagerSignatureDate}`}),
                             ],
                         }),
                     ],
@@ -283,5 +279,3 @@ export function NoticeLetterForm() {
     </Card>
   );
 }
-
-    

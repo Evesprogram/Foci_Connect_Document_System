@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import SignatureCanvas from "react-signature-canvas";
 import { Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, WidthType, BorderStyle, HeadingLevel, AlignmentType } from "docx";
 import { saveAs } from "file-saver";
 import {
@@ -24,6 +23,7 @@ import { Copy, Share2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const SignaturePad = dynamic(() => import('./signature-pad').then(mod => mod.SignaturePad), { ssr: false });
+const SignatureCanvas = dynamic(() => import('react-signature-canvas'), { ssr: false });
 
 const base64ToArrayBuffer = (base64: string): ArrayBuffer => {
     return Buffer.from(base64.split(",")[1], 'base64');
@@ -32,12 +32,6 @@ const base64ToArrayBuffer = (base64: string): ArrayBuffer => {
 export function ProjectReportForm() {
   const { toast } = useToast();
   const [currentUrl, setCurrentUrl] = useState('');
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setCurrentUrl(window.location.href);
-    }
-  }, []);
 
   const [formData, setFormData] = useState({
     month: '',
@@ -56,19 +50,22 @@ export function ProjectReportForm() {
     approvedByDate: "",
   });
 
-  const approvedBySigRef = useRef<SignatureCanvas>(null);
+  const approvedBySigRef = useRef<import("react-signature-canvas").default>(null);
 
   useEffect(() => {
-    const currentDate = new Date();
-    const year = currentDate.getFullYear();
-    const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
-    const uniqueNum = Math.floor(1000 + Math.random() * 9000);
-    setFormData(prev => ({
-        ...prev, 
-        reportNo: `MER-${year}${month}-${uniqueNum}`,
-        month: currentDate.toLocaleString('default', { month: 'long' }),
-        year: year.toString(),
-    }));
+    if (typeof window !== 'undefined') {
+      setCurrentUrl(window.location.href);
+      const currentDate = new Date();
+      const year = currentDate.getFullYear();
+      const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+      const uniqueNum = Math.floor(1000 + Math.random() * 9000);
+      setFormData(prev => ({
+          ...prev, 
+          reportNo: `MER-${year}${month}-${uniqueNum}`,
+          month: currentDate.toLocaleString('default', { month: 'long' }),
+          year: year.toString(),
+      }));
+    }
   }, []);
   
   useEffect(() => {
@@ -113,7 +110,7 @@ export function ProjectReportForm() {
         children: [
           new Paragraph({ children: [new TextRun({ text: "FOCI GROUP (Pty) Ltd", bold: true })], alignment: AlignmentType.CENTER }),
           new Paragraph({ text: `MONTH-END REPORT – ${formData.month.toUpperCase()} ${formData.year}`, heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER }),
-          new Paragraph(""),
+          new Paragraph({text: ""}),
 
           new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
@@ -132,7 +129,7 @@ export function ProjectReportForm() {
               }),
             ],
           }),
-          new Paragraph(""),
+          new Paragraph({text: ""}),
 
           new Paragraph({ children: [new TextRun({ text: "1. Financial Summary", bold: true })], spacing: { before: 200 } }),
           new Table({
@@ -284,5 +281,3 @@ export function ProjectReportForm() {
     </Card>
   );
 }
-
-    

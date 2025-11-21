@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, BorderStyle, HeadingLevel, AlignmentType, ImageRun } from "docx";
 import { saveAs } from "file-saver";
 import { PlusCircle, Trash2, Share2, Copy } from "lucide-react";
-import SignatureCanvas from "react-signature-canvas";
 import {
   Dialog,
   DialogContent,
@@ -23,6 +22,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 
 const SignaturePad = dynamic(() => import('./signature-pad').then(mod => mod.SignaturePad), { ssr: false });
+const SignatureCanvas = dynamic(() => import('react-signature-canvas'), { ssr: false });
 
 
 const initialLineItem = { description: "", qty: 1, unitPrice: 0 };
@@ -36,12 +36,6 @@ export function PurchaseOrderForm() {
   const { toast } = useToast();
   const [currentUrl, setCurrentUrl] = useState('');
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setCurrentUrl(window.location.href);
-    }
-  }, []);
-  
   const [orderNo, setOrderNo] = useState("");
   const [orderDate, setOrderDate] = useState("");
   const [supplierName, setSupplierName] = useState("");
@@ -52,13 +46,16 @@ export function PurchaseOrderForm() {
   const [totalIncl, setTotalIncl] = useState(0);
   const [authorisedBy, setAuthorisedBy] = useState("");
 
-  const authSigRef = useRef<SignatureCanvas>(null);
+  const authSigRef = useRef<import("react-signature-canvas").default>(null);
 
   useEffect(() => {
-    const year = new Date().getFullYear();
-    const uniqueNum = Math.floor(1000 + Math.random() * 9000);
-    setOrderNo(`PO-FOC-${year}-${uniqueNum}`);
-    setOrderDate(new Date().toISOString().split('T')[0]);
+    if (typeof window !== 'undefined') {
+      setCurrentUrl(window.location.href);
+      const year = new Date().getFullYear();
+      const uniqueNum = Math.floor(1000 + Math.random() * 9000);
+      setOrderNo(`PO-FOC-${year}-${uniqueNum}`);
+      setOrderDate(new Date().toISOString().split('T')[0]);
+    }
   }, []);
 
   useEffect(() => {
@@ -123,7 +120,7 @@ export function PurchaseOrderForm() {
         children: [
           new Paragraph({ children: [new TextRun({ text: "FOCI GROUP (Pty) Ltd", bold: true })], alignment: AlignmentType.CENTER }),
           new Paragraph({ text: "PURCHASE ORDER", heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER }),
-          new Paragraph(""),
+          new Paragraph({text: ""}),
 
           new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
@@ -143,7 +140,7 @@ export function PurchaseOrderForm() {
               }),
             ],
           }),
-          new Paragraph(""),
+          new Paragraph({text: ""}),
 
           new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
@@ -169,7 +166,7 @@ export function PurchaseOrderForm() {
               }))
             ]
           }),
-          new Paragraph(""),
+          new Paragraph({text: ""}),
 
           new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
@@ -180,7 +177,7 @@ export function PurchaseOrderForm() {
               new TableRow({ children: [new TableCell({ children: [] }), new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Total Order Value (incl VAT):", bold: true })], alignment: AlignmentType.RIGHT })] }), new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: `R ${formatCurrency(totalIncl)}`, bold: true })], alignment: AlignmentType.RIGHT })] })] }),
             ]
           }),
-          new Paragraph(""),
+          new Paragraph({text: ""}),
           new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
             rows: [
@@ -326,5 +323,3 @@ export function PurchaseOrderForm() {
     </Card>
   );
 }
-
-    

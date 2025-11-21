@@ -28,12 +28,6 @@ const VAT_RATE = 0.15;
 export function TaxInvoiceForm() {
   const { toast } = useToast();
   const [currentUrl, setCurrentUrl] = useState('');
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setCurrentUrl(window.location.href);
-    }
-  }, []);
   
   const [invoiceNo, setInvoiceNo] = useState("");
   const [invoiceDate, setInvoiceDate] = useState("");
@@ -47,10 +41,13 @@ export function TaxInvoiceForm() {
   const [total, setTotal] = useState(0);
 
   useEffect(() => {
-    const year = new Date().getFullYear();
-    const uniqueNum = Math.floor(1000 + Math.random() * 9000);
-    setInvoiceNo(`INV-FOC-${year}-${uniqueNum}`);
-    setInvoiceDate(new Date().toISOString().split('T')[0]);
+    if (typeof window !== 'undefined') {
+      setCurrentUrl(window.location.href);
+      const year = new Date().getFullYear();
+      const uniqueNum = Math.floor(1000 + Math.random() * 9000);
+      setInvoiceNo(`INV-FOC-${year}-${uniqueNum}`);
+      setInvoiceDate(new Date().toISOString().split('T')[0]);
+    }
   }, []);
 
   useEffect(() => {
@@ -108,7 +105,7 @@ export function TaxInvoiceForm() {
         children: [
           new Paragraph({ children: [new TextRun({ text: "FOCI GROUP (Pty) Ltd", bold: true })], alignment: AlignmentType.CENTER }),
           new Paragraph({ text: "TAX INVOICE", heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER }),
-          new Paragraph(""),
+          new Paragraph({text: ""}),
 
           new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
@@ -122,7 +119,7 @@ export function TaxInvoiceForm() {
               }),
             ],
           }),
-          new Paragraph(""),
+          new Paragraph({text: ""}),
 
           new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
@@ -148,7 +145,7 @@ export function TaxInvoiceForm() {
               })
             ]
           }),
-          new Paragraph(""),
+          new Paragraph({text: ""}),
 
           new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
@@ -174,7 +171,7 @@ export function TaxInvoiceForm() {
               }))
             ]
           }),
-          new Paragraph(""),
+          new Paragraph({text: ""}),
 
           new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
@@ -185,9 +182,9 @@ export function TaxInvoiceForm() {
               new TableRow({ children: [new TableCell({ children: [] }), new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "TOTAL AMOUNT DUE:", bold: true })], alignment: AlignmentType.RIGHT })] }), new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: `R ${formatCurrency(total)}`, bold: true })], alignment: AlignmentType.RIGHT })] })] }),
             ]
           }),
-          new Paragraph(""),
+          new Paragraph({text: ""}),
           new Paragraph({ children: [new TextRun({ text: `Bank Details: FNB | Acc: 628 495 821 33 | Branch: 25-01-55 | Ref: ${invoiceNo}`, bold: true })] }),
-          new Paragraph(""),
+          new Paragraph({text: ""}),
           new Paragraph({ children: [new TextRun({ text: "Terms: Payment within 30 days of invoice date.", italics: true })] }),
         ],
       }]
@@ -198,8 +195,8 @@ export function TaxInvoiceForm() {
   };
 
   const handleExportToPdf = async () => {
-    const { jsPDF } = await import('jspdf');
-    const autoTable = (await import('jspdf-autotable')).default;
+    const { default: jsPDF } = await import('jspdf');
+    const { default: autoTable } = await import('jspdf-autotable');
 
     const doc = new jsPDF();
     
@@ -395,5 +392,3 @@ export function TaxInvoiceForm() {
     </Card>
   );
 }
-
-    

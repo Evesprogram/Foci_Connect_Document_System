@@ -42,7 +42,7 @@ export function AcceptanceLetterForm() {
 
   const [formData, setFormData] = useState({
     refNo: "",
-    date: new Date().toISOString().split('T')[0],
+    date: "",
     clientName: "",
     clientAddress: "",
     contactPerson: "",
@@ -60,7 +60,11 @@ export function AcceptanceLetterForm() {
   useEffect(() => {
     const year = new Date().getFullYear();
     const uniqueNum = Math.floor(1000 + Math.random() * 9000);
-    setFormData(prev => ({...prev, refNo: `ACCEPT-${year}-${uniqueNum}`}));
+    setFormData(prev => ({
+        ...prev, 
+        refNo: `ACCEPT-${year}-${uniqueNum}`,
+        date: new Date().toISOString().split('T')[0]
+    }));
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {

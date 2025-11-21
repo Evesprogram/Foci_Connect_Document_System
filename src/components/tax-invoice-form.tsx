@@ -36,7 +36,7 @@ export function TaxInvoiceForm() {
   }, []);
   
   const [invoiceNo, setInvoiceNo] = useState("");
-  const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().split('T')[0]);
+  const [invoiceDate, setInvoiceDate] = useState("");
   const [clientName, setClientName] = useState("");
   const [clientAddress, setClientAddress] = useState("");
   const [clientVat, setClientVat] = useState("");
@@ -50,6 +50,7 @@ export function TaxInvoiceForm() {
     const year = new Date().getFullYear();
     const uniqueNum = Math.floor(1000 + Math.random() * 9000);
     setInvoiceNo(`INV-FOC-${year}-${uniqueNum}`);
+    setInvoiceDate(new Date().toISOString().split('T')[0]);
   }, []);
 
   useEffect(() => {

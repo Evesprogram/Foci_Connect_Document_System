@@ -42,7 +42,7 @@ export function NoticeLetterForm() {
 
   const [formData, setFormData] = useState({
     refNo: "",
-    date: new Date().toISOString().split('T')[0],
+    date: "",
     employeeName: "",
     employeeId: "",
     noticeType: "",
@@ -60,7 +60,11 @@ export function NoticeLetterForm() {
   useEffect(() => {
     const year = new Date().getFullYear();
     const uniqueNum = Math.floor(1000 + Math.random() * 9000);
-    setFormData(prev => ({...prev, refNo: `NOTICE-${year}-${uniqueNum}`}));
+    setFormData(prev => ({
+        ...prev, 
+        refNo: `NOTICE-${year}-${uniqueNum}`,
+        date: new Date().toISOString().split('T')[0]
+    }));
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {

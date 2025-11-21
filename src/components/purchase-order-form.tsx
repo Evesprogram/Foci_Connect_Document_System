@@ -43,7 +43,7 @@ export function PurchaseOrderForm() {
   }, []);
   
   const [orderNo, setOrderNo] = useState("");
-  const [orderDate, setOrderDate] = useState(new Date().toISOString().split('T')[0]);
+  const [orderDate, setOrderDate] = useState("");
   const [supplierName, setSupplierName] = useState("");
   const [deliveryDate, setDeliveryDate] = useState("");
   const [lineItems, setLineItems] = useState([initialLineItem]);
@@ -58,6 +58,7 @@ export function PurchaseOrderForm() {
     const year = new Date().getFullYear();
     const uniqueNum = Math.floor(1000 + Math.random() * 9000);
     setOrderNo(`PO-FOC-${year}-${uniqueNum}`);
+    setOrderDate(new Date().toISOString().split('T')[0]);
   }, []);
 
   useEffect(() => {

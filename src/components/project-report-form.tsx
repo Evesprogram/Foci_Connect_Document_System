@@ -23,10 +23,15 @@ import { Copy, Share2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const SignaturePad = dynamic(() => import('./signature-pad').then(mod => mod.SignaturePad), { ssr: false });
-const SignatureCanvas = dynamic(() => import('react-signature-canvas'), { ssr: false });
 
 const base64ToArrayBuffer = (base64: string): ArrayBuffer => {
-    return Buffer.from(base64.split(",")[1], 'base64');
+    const binaryString = atob(base64.split(",")[1]);
+    const len = binaryString.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes.buffer;
 };
 
 export function ProjectReportForm() {
@@ -55,17 +60,17 @@ export function ProjectReportForm() {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setCurrentUrl(window.location.href);
-      const currentDate = new Date();
-      const year = currentDate.getFullYear();
-      const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
-      const uniqueNum = Math.floor(1000 + Math.random() * 9000);
-      setFormData(prev => ({
-          ...prev, 
-          reportNo: `MER-${year}${month}-${uniqueNum}`,
-          month: currentDate.toLocaleString('default', { month: 'long' }),
-          year: year.toString(),
-      }));
     }
+    const currentDate = new Date();
+    const year = currentDate.getFullYear();
+    const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+    const uniqueNum = Math.floor(1000 + Math.random() * 9000);
+    setFormData(prev => ({
+        ...prev, 
+        reportNo: `MER-${year}${month}-${uniqueNum}`,
+        month: currentDate.toLocaleString('default', { month: 'long' }),
+        year: year.toString(),
+    }));
   }, []);
   
   useEffect(() => {

@@ -24,11 +24,15 @@ import { Copy, Share2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const SignaturePad = dynamic(() => import('./signature-pad').then(mod => mod.SignaturePad), { ssr: false });
-const SignatureCanvas = dynamic(() => import('react-signature-canvas'), { ssr: false });
-
 
 const base64ToArrayBuffer = (base64: string): ArrayBuffer => {
-    return Buffer.from(base64.split(",")[1], 'base64');
+    const binaryString = atob(base64.split(",")[1]);
+    const len = binaryString.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes.buffer;
 };
 
 const initialIssueRow = { issue: "", risk: "", action: "" };

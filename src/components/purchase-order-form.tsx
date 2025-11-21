@@ -22,14 +22,18 @@ import {
 import { useToast } from "@/hooks/use-toast";
 
 const SignaturePad = dynamic(() => import('./signature-pad').then(mod => mod.SignaturePad), { ssr: false });
-const SignatureCanvas = dynamic(() => import('react-signature-canvas'), { ssr: false });
-
 
 const initialLineItem = { description: "", qty: 1, unitPrice: 0 };
 const VAT_RATE = 0.15;
 
 const base64ToArrayBuffer = (base64: string): ArrayBuffer => {
-    return Buffer.from(base64.split(",")[1], 'base64');
+    const binaryString = atob(base64.split(",")[1]);
+    const len = binaryString.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes.buffer;
 };
 
 export function PurchaseOrderForm() {
@@ -51,11 +55,11 @@ export function PurchaseOrderForm() {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setCurrentUrl(window.location.href);
-      const year = new Date().getFullYear();
-      const uniqueNum = Math.floor(1000 + Math.random() * 9000);
-      setOrderNo(`PO-FOC-${year}-${uniqueNum}`);
-      setOrderDate(new Date().toISOString().split('T')[0]);
     }
+    const year = new Date().getFullYear();
+    const uniqueNum = Math.floor(1000 + Math.random() * 9000);
+    setOrderNo(`PO-FOC-${year}-${uniqueNum}`);
+    setOrderDate(new Date().toISOString().split('T')[0]);
   }, []);
 
   useEffect(() => {
